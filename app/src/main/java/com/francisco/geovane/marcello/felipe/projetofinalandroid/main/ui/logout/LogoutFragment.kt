@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
@@ -14,12 +13,14 @@ import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.login.LoginActivity
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.MainActivity
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.utils.AnalyticsUtils
+import com.francisco.geovane.marcello.felipe.projetofinalandroidlib.components.customdialog.CustomDialog
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class LogoutFragment : Fragment() {
 
     private var bundle: Bundle = Bundle()
@@ -31,39 +32,44 @@ class LogoutFragment : Fragment() {
     private lateinit var logoutViewModel: LogoutViewModel
     private lateinit var auth: FirebaseAuth
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         auth = Firebase.auth
         analytics = FirebaseAnalytics.getInstance(context)
         AnalyticsUtils.setPageData(analytics, bundle, appId, pageId)
 
-        val builder = AlertDialog.Builder(requireActivity())
 
-        builder.setMessage(R.string.logout)
-            .setCancelable(false)
-            .setPositiveButton(R.string.txt_yes) { dialog, id ->
+        val customDialog = CustomDialog()
+        val logoutTitle = context?.resources?.getString(R.string.logout_title)
+        val logoutDescription = context?.resources?.getString(R.string.logout_description)
+        val logoutCancel =  context?.resources?.getString(R.string.logout_cancel)
+        val logoutConfirm =  context?.resources?.getString(R.string.logout_confirm)
+
+        val (title, subtitle) = Pair(logoutTitle, logoutDescription)
+
+        customDialog.showDialog(
+            requireActivity(), R.drawable.logo, title, subtitle,
+            logoutConfirm,
+            {
                 AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "LogOut")
                 auth.signOut()
                 val currentUser: FirebaseUser? = auth.currentUser
-                Log.i("USER", currentUser.toString())
+                Log.d("USER", currentUser.toString())
                 if (currentUser == null){
+                    customDialog.dismissDialog()
                     val intent = Intent(activity, LoginActivity::class.java)
                     startActivity(intent)
                     activity?.finish()
                 }
-
-            }
-            .setNegativeButton(R.string.txt_cancel) { dialog, id ->
+            },
+            logoutCancel,
+            {
                 val intent = Intent(activity, MainActivity::class.java)
                 startActivity(intent)
                 activity?.finish()
-                dialog.dismiss()
-            }
-        val alert = builder.create()
-        alert.show()
+                customDialog.dismissDialog()
+            },
+            false
+        )
 
         logoutViewModel = ViewModelProvider(this).get(LogoutViewModel::class.java)
 

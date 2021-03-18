@@ -1,22 +1,19 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.BaseActivity
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.utils.AnalyticsUtils
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.analytics.FirebaseAnalytics
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var analytics: FirebaseAnalytics
 
-    private var bundle: Bundle = Bundle()
-    private var appId: String = BuildConfig.APP_ID
+class MainActivity : BaseActivity() {
+
     private var pageId: String = "Main"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,5 +34,5 @@ class MainActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-    }
+   }
 }

@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgColorPrimary"
-    tools:context=".main.ui.about.AboutFragment">
-
-    <LinearLayout
-        android:id="@+id/root_lienar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
+    android:fillViewport="true"
+    tools:context=".main.ui.about.AboutFragment"
     >
+    <LinearLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bgColorPrimary"
+        android:layout_marginBottom="55dp"
+        android:orientation="vertical"
+        tools:ignore="ExtraText">
+
         <TextView
             android:id="@+id/text_app_name"
             android:layout_width="match_parent"
@@ -23,7 +25,9 @@
             android:textAlignment="center"
             android:textColor="@color/colorPrimary"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:text="@string/app_name"
+            />
 
         <ImageView
             android:layout_width="150dp"
@@ -64,23 +68,22 @@
             android:id="@+id/list_text_app_by_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
             android:divider="@null"
             android:dividerHeight="0dp"
-            >
-        </ListView>
-    </LinearLayout>
+            />
 
-    <TextView
-        android:id="@+id/text_copyright"
-        android:layout_below="@id/root_lienar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="30dp"
-        android:text="@string/about_copyright"
-        android:textAlignment="center"
-        android:textColor="@color/colorSecondary"
-        android:textSize="14sp"
-        android:alpha="0.7"
-        />
-</RelativeLayout>
+        <TextView
+            android:id="@+id/text_copyright"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/about_copyright"
+            android:textAlignment="center"
+            android:textColor="@color/colorSecondary"
+            android:textSize="14sp"
+            android:alpha="0.7"
+            />
+        </LinearLayout>
+</androidx.core.widget.NestedScrollView>

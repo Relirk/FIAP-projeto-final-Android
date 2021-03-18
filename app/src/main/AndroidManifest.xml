@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.francisco.geovane.marcello.felipe.projetofinalandroid">
 
+    <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <application
-        android:name=".LocaleDefault"
         android:allowBackup="true"
         android:icon="@drawable/logo"
         android:roundIcon="@drawable/logo"
         android:label="${appLabel}"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.ProjetoFinalAndroid">
-        <activity
-            android:name=".main.MainActivity"
-            android:label="@string/title_activity_main" />
+        tools:replace="android:icon, android:roundIcon"
+        android:theme="@style/Theme.ProjetoFinalAndroid"
+        android:name="androidx.multidex.MultiDexApplication" >
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="${mapsApiKey}" />
+        <activity android:name=".main.MainActivity" android:label="@string/title_activity_main" />
         <activity android:name=".splash.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,33 +1,47 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.utils
 
 import android.content.Context
-import android.content.res.Configuration
 import android.preference.PreferenceManager
-import android.text.TextUtils
 import java.util.*
 
-@Suppress("DEPRECATION")
-class LocaleUtils {
+object LocaleUtils {
 
-    companion object {
+    private const val PREF_LANG = "language"
 
-        fun updateLanguage(ctx: Context) {
+    fun presetLocale(context: Context): Context {
 
-            val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
-            val lang = prefs.getString("locale_override", "en")
+        val lang = getPrefLang(context)
 
-            updateLanguage(ctx, lang)
-        }
+        return setLocale(context, lang!!)
+    }
 
-        fun updateLanguage(ctx: Context, lang: String?) {
-            val cfg = Configuration()
+    fun setLocale(context: Context, language: String): Context {
 
-            if (!TextUtils.isEmpty(lang))
-                cfg.locale = Locale(lang)
-            else
-                cfg.locale = Locale.getDefault()
+        setPrefLang(context, language)
 
-            ctx.resources.updateConfiguration(cfg, null)
-        }
+        val locale = Locale(language)
+        Locale.setDefault(locale)
+
+        val configuration = context.resources.configuration
+        configuration.setLocale(locale)
+        configuration.setLayoutDirection(locale)
+
+        return context.createConfigurationContext(configuration)
+    }
+
+    fun getPrefLang(context: Context?, defaultLanguage: String = "en"): String? {
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+        return preferences.getString(PREF_LANG, defaultLanguage)
+    }
+
+    private fun setPrefLang(context: Context, language: String) {
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val editor = preferences.edit()
+
+        editor.putString(PREF_LANG, language)
+        editor.apply()
     }
 }

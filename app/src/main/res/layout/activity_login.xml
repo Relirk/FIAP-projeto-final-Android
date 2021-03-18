@@ -28,7 +28,8 @@
             android:backgroundTint="@color/bgColorPrimary"
             android:textColor="@color/textColorPrimary"
             android:textColorHint="@color/textColorPrimary"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:autofillHints="" />
 
         <EditText
             android:id="@+id/tv_password"
@@ -38,7 +39,8 @@
             android:backgroundTint="@color/bgColorPrimary"
             android:textColor="@color/textColorPrimary"
             android:textColorHint="@color/textColorPrimary"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:importantForAutofill="no" />
 
         <Button
             android:id="@+id/btn_log_in"

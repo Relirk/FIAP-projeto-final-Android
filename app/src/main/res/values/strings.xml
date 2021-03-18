@@ -9,21 +9,31 @@
 
     <string name="email">E-mail</string>
     <string name="password">Password</string>
-    <string name="logout">Are you sure you want to logout?</string>
+
+    <!--  logout page  -->
+    <string name="logout_title">Logout</string>
+    <string name="logout_description">Are you sure you want to logout?</string>
+    <string name="logout_confirm">Confirm</string>
+    <string name="logout_cancel">Cancel</string>
 
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_search">Search</string>
     <string name="title_welcome">Welcome</string>
-    <string name="title_home">Map</string>
-    <string name="title_dashboard">List</string>
+    <string name="description_welcome">Register your places to walk and always find something new!</string>
+
+    <string name="title_map">Map</string>
+    <string name="title_list">List</string>
     <string name="title_about">About</string>
     <string name="title_config">Configuration</string>
-    <string name="title_notifications">Exit</string>
+    <string name="title_exit">Exit</string>
 
     <!-- generics -->
     <string name="txt_yes">Yes</string>
     <string name="txt_no">No</string>
     <string name="txt_cancel">Cancel</string>
+
+    <!-- maps page -->
+    <string name="txt_reset">Reset</string>
+    <string name="txt_save_location">Save location!</string>
 
     <!-- about page -->
     <string name="about_version">Version</string>
@@ -34,7 +44,7 @@
     <string name="config_lang_label">Language</string>
     <string name="config_lang_confirmation">Do you want to change the language to "%1$s"?</string>
     <string name="config_lang_current">Current</string>
-
+  
     <!-- list places page -->
     <string name="place_name">Place Name</string>
     <string name="place_description">Place description</string>

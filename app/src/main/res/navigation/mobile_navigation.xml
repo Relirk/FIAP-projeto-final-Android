@@ -8,13 +8,13 @@
     <fragment
         android:id="@+id/navigation_map"
         android:name="com.francisco.geovane.marcello.felipe.projetofinalandroid.main.ui.map.MapFragment"
-        android:label="@string/title_home"
+        android:label="@string/title_map"
         tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/navigation_list"
         android:name="com.francisco.geovane.marcello.felipe.projetofinalandroid.main.ui.list.ListFragment"
-        android:label="@string/title_dashboard"
+        android:label="@string/title_list"
         tools:layout="@layout/fragment_list" />
 
     <fragment
@@ -26,12 +26,12 @@
     <fragment
         android:id="@+id/navigation_config"
         android:name="com.francisco.geovane.marcello.felipe.projetofinalandroid.main.ui.config.ConfigFragment"
-        android:label="@string/title_notifications"
+        android:label="@string/title_config"
         tools:layout="@layout/fragment_config" />
 
     <fragment
         android:id="@+id/navigation_logout"
         android:name="com.francisco.geovane.marcello.felipe.projetofinalandroid.main.ui.logout.LogoutFragment"
-        android:label="@string/title_notifications"
+        android:label="@string/title_exit"
         tools:layout="@layout/fragment_logout" />
 </navigation>

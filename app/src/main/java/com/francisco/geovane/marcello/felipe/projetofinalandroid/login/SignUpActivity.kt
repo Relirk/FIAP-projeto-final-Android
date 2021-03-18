@@ -5,50 +5,38 @@ import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.BaseActivity
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.utils.AnalyticsUtils
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_sign_up.*
-import kotlinx.android.synthetic.main.activity_sign_up.btn_sign_up
-import kotlinx.android.synthetic.main.activity_sign_up.tv_password
-import kotlinx.android.synthetic.main.activity_sign_up.tv_username
 
-class SignUpActivity : AppCompatActivity() {
+class SignUpActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
 
-    private var bundle: Bundle = Bundle()
-    private lateinit var analytics: FirebaseAnalytics
+    private val pageId: String = "SignUp"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         analytics = FirebaseAnalytics.getInstance(this)
         supportActionBar?.hide()
         setContentView(R.layout.activity_sign_up)
         auth = Firebase.auth
 
-        val appId: String = BuildConfig.APP_ID
-        val pageId: String = this.localClassName
-
         btn_sign_up.setOnClickListener {
 
-            bundle.clear()
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "$appId:$pageId:btnSignUpClick")
-            analytics.logEvent("e_Click", bundle)
-
+            AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "btnSingIn")
             signUpUser()
         }
 
         btn_sign_in.setOnClickListener {
 
-            bundle.clear()
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "$appId:$pageId:btnLoginClick")
-            analytics.logEvent("e_Click", bundle)
-
+            AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "btnLogin")
             startActivity(Intent(this, LoginActivity::class.java))
         }
     }

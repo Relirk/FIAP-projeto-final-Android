@@ -18,7 +18,7 @@ class AnalyticsUtils {
 
         fun setClickData(analytics:FirebaseAnalytics, bundle:Bundle, appId:String, pageId:String, event:String = "") {
 
-            val tag = "$appId:$pageId" + (if(!event.isEmpty()) ":$event" else "")
+            val tag = "$appId:$pageId" + (if(event.isNotEmpty()) ":$event" else "")
 
             bundle.clear()
             bundle.putString("app_id", appId)

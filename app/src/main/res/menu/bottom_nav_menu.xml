@@ -4,12 +4,12 @@
     <item
         android:id="@+id/navigation_map"
         android:icon="@drawable/ic_explore_24px"
-        android:title="@string/title_home" />
+        android:title="@string/title_map" />
 
     <item
         android:id="@+id/navigation_list"
         android:icon="@drawable/ic_list_24px"
-        android:title="@string/title_dashboard" />
+        android:title="@string/title_list" />
 
     <item
         android:id="@+id/navigation_about"
@@ -24,6 +24,6 @@
     <item
         android:id="@+id/navigation_logout"
         android:icon="@drawable/ic_logout_24px"
-        android:title="@string/title_notifications" />
+        android:title="@string/title_exit" />
 
 </menu>

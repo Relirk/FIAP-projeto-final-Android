@@ -9,21 +9,31 @@
 
     <string name="email">E-mail</string>
     <string name="password">Senha</string>
-    <string name="logout">Tem certeza que deseja realizar o logout?</string>
+
+    <!--  logout page  -->
+    <string name="logout_title">Sair</string>
+    <string name="logout_description">Tem certeza que deseja realizar o logout?</string>
+    <string name="logout_confirm">Sair</string>
+    <string name="logout_cancel">Cancelar</string>
 
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_search">Buscar</string>
     <string name="title_welcome">Bem-vindo</string>
-    <string name="title_home">Mapa</string>
-    <string name="title_dashboard">Listagem</string>
+    <string name="description_welcome">Registre seus lugares para passeio e sempre ache algo novo!</string>
+
+    <string name="title_map">Mapa</string>
+    <string name="title_list">Listagem</string>
     <string name="title_about">Sobre</string>
     <string name="title_config">Configuração</string>
-    <string name="title_notifications">Sair</string>
+    <string name="title_exit">Sair</string>
 
     <!-- generics -->
     <string name="txt_yes">Sim</string>
     <string name="txt_no">Não</string>
     <string name="txt_cancel">Cancelar</string>
+
+    <!-- maps page -->
+    <string name="txt_reset">Limpar</string>
+    <string name="txt_save_location">Salvar local!</string>
 
     <!-- about page -->
     <string name="about_version">Versão</string>
