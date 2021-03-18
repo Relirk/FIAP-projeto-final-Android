@@ -44,4 +44,36 @@
     <string name="config_lang_label">Idioma</string>
     <string name="config_lang_confirmation">Você deseja alterar o idioma para "%1$s"?</string>
     <string name="config_lang_current">Atual</string>
+
+    <!-- list places page -->
+    <string name="place_name">Nome do Lugar</string>
+    <string name="place_description">Descrição do lugar</string>
+    <string name="place_isVisited">Lugar visitado</string>
+    <string name="btn_add">Adicionar Item</string>
+
+    <!-- each place listed -->
+    <string name="edit_button">Editar</string>
+    <string name="share_button">Compartilhar</string>
+    <string name="call_button">Ligar</string>
+    <string name="delete_button">Deletar</string>
+
+    <!-- exclusion modal -->
+    <string name="title_exclusion">Exclusão de Local</string>
+    <string name="description_exclusion">Deseja apagar este local?</string>
+    <string name="confirm_exclusion">Apagar</string>
+    <string name="cancel_exclusion">Cancelar</string>
+    <string name="text_share">Compartilhar para:</string>
+
+    <!-- edit place page -->
+    <string name="new_place_title">Novo Lugar</string>
+    <string name="edit_place_title">Editar Lugar</string>
+    <string name="forbidden_empty">Campo Nome está vazio.</string>
+    <string name="item_image">Imagem</string>
+    <string name="placeholder_place_name">Nome</string>
+    <string name="placeholder_place_address">Endereço</string>
+    <string name="placeholder_place_description">Descrição</string>
+    <string name="placeholder_place_phone">Telefone</string>
+    <string name="placeholder_place_visited">Ligar já visitado?</string>
+    <string name="edit_save_button">Salvar</string>
+
 </resources>

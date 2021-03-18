@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:padding="16dp"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/etPlaceImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@string/item_image"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <EditText
+            android:id="@+id/etPlaceName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:hint="@string/placeholder_place_name"
+            android:inputType="text"
+            android:autofillHints=""
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/etPlaceAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:hint="@string/placeholder_place_address"
+            android:inputType="text"
+            android:autofillHints=""
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/etPlaceDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:hint="@string/placeholder_place_description"
+            android:inputType="text"
+            android:autofillHints=""
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/etPlacePhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:hint="@string/placeholder_place_phone"
+            android:inputType="phone"
+            android:autofillHints=""
+            android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/etPlaceVisited"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/placeholder_place_visited"
+            tools:ignore="UseSwitchCompatOrMaterialXml"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:text="@string/edit_save_button"
+            />
+    </LinearLayout>
+</ScrollView>
