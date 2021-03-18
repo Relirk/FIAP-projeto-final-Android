@@ -34,4 +34,36 @@
     <string name="config_lang_label">Language</string>
     <string name="config_lang_confirmation">Do you want to change the language to "%1$s"?</string>
     <string name="config_lang_current">Current</string>
+
+    <!-- list places page -->
+    <string name="place_name">Place Name</string>
+    <string name="place_description">Place description</string>
+    <string name="place_isVisited">Place visited</string>
+    <string name="btn_add">Add Item</string>
+
+    <!-- each place listed -->
+    <string name="edit_button">Edit</string>
+    <string name="share_button">Share</string>
+    <string name="call_button">Call</string>
+    <string name="delete_button">Delete</string>
+    <string name="text_share">Share to:</string>
+
+    <!-- exclusion modal -->
+    <string name="title_exclusion">Place Deletion</string>
+    <string name="description_exclusion">Do you want to delete this location?</string>
+    <string name="confirm_exclusion">Delete</string>
+    <string name="cancel_exclusion">Cancel</string>
+
+    <!-- edit place page -->
+    <string name="new_place_title">New Place</string>
+    <string name="edit_place_title">Edit Place</string>
+    <string name="forbidden_empty">Name field is empty.</string>
+    <string name="item_image">Image</string>
+    <string name="placeholder_place_name">Name</string>
+    <string name="placeholder_place_address">Address</string>
+    <string name="placeholder_place_description">Description</string>
+    <string name="placeholder_place_phone">Phone</string>
+    <string name="placeholder_place_visited">Is visited place?</string>
+    <string name="edit_save_button">Save</string>
+
 </resources>
