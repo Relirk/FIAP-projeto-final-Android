@@ -17,7 +17,8 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         tools:replace="android:icon, android:roundIcon"
-        android:theme="@style/Theme.ProjetoFinalAndroid">
+        android:theme="@style/Theme.ProjetoFinalAndroid"
+        android:name="androidx.multidex.MultiDexApplication" >
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="${mapsApiKey}" />
         <activity android:name=".main.MainActivity" android:label="@string/title_activity_main" />
         <activity android:name=".splash.SplashActivity">
