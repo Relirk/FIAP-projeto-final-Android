@@ -1,6 +1,5 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.ui.map
 
-import android.content.Context.INPUT_METHOD_SERVICE
 import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
@@ -9,212 +8,216 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.repository.GoogleMapsPlaceRepositoryImpl
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.GoogleMapsPlaceService
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.GoogleMapsRequestApi
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.utils.AnalyticsUtils
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.utils.FirebaseUtils
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
+import com.google.gson.Gson
 import java.io.IOException
 
-@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener {
     
     private lateinit var analytics: FirebaseAnalytics
     private lateinit var remoteConfig: FirebaseRemoteConfig
-    private lateinit var key: String
+    private lateinit var mapsApiKey: String
 
-    private var LOG_TAG = "DEBUG"
+    private var LOG_TAG = "myLog__"
     private var bundle: Bundle = Bundle()
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "Map"
 
     private lateinit var mapView: MapView
     private lateinit var map: GoogleMap
+    private lateinit var selectedPlace: MapModel
+    private lateinit var autocompleteFragment: AutocompleteSupportFragment
 
+    // default location on map - FIAP - Campus Paulista
     private val defaultAddress = LatLng(-23.5641095, -46.65240989999999)
     private val defaultZoom = 16F
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.fragment_map, container, false)
-
-        loadMap(root, savedInstanceState)
-
-        // Remote Config
-        fetchRemoteConfig(root)
 
         // Analytics
         analytics = FirebaseAnalytics.getInstance(context)
         AnalyticsUtils.setPageData(analytics, bundle, appId, pageId)
 
+        // Remote Config
+        remoteConfig = FirebaseUtils.fetchRemoteConfig()
+        mapsApiKey = remoteConfig.getString("google_maps_api_key")
+
+        if(loadMap(root, savedInstanceState)) {
+
+            val btnReset: Button = root.findViewById(R.id.btn_reset)
+            btnReset.setOnClickListener {
+
+                map.clear()
+                autocompleteFragment.setText("")
+                setDefaultAdress()
+            }
+
+            val btnAdd: Button = root.findViewById(R.id.btn_add)
+            btnAdd.setOnClickListener {
+
+                //TODO: utilizar 'selectedPlace' para obter as informações que serão salvas no DB
+                Log.i(LOG_TAG, Gson().toJson(selectedPlace))
+            }
+        }
+
         return root
     }
 
-    private fun fetchRemoteConfig(root: View) {
-        remoteConfig = Firebase.remoteConfig
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 3600
-        }
-        remoteConfig.setConfigSettingsAsync(configSettings)
-        remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-
-                Log.d(LOG_TAG, "onComplete Succeeded: $task.result")
-                searchTrigger(root)
-
-            } else { Log.d(LOG_TAG, "onComplete failed") }
-        }.addOnFailureListener { e -> Log.d(LOG_TAG, "onFailure : " + e.message) }
-    }
-
-    private fun searchTrigger(root: View) {
-        val btnSearch: Button = root.findViewById(R.id.btn_search)
-        val btnReset: Button = root.findViewById(R.id.btn_reset)
-        val textAddress: EditText = root.findViewById(R.id.text_address)
-
-        key = remoteConfig.getString("google_maps_api_key")
-
-        btnSearch.setOnClickListener {
-            if(textAddress.text.toString().isEmpty()) {
-                Toast.makeText(context, R.string.txt_fill_address, Toast.LENGTH_LONG).show()
-            } else {
-                searchHideKeyboard()
-                searchAddress(key, textAddress.text.toString())
-            }
-        }
-
-        btnReset.setOnClickListener {
-            searchHideKeyboard()
-            textAddress.setText("")
-            updateMap(defaultAddress,"FIAP")
-        }
-    }
-
-    private fun searchHideKeyboard() {
-        if (requireActivity().currentFocus != null) {
-            val inputManager = requireActivity().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-            inputManager.hideSoftInputFromWindow(activity?.currentFocus?.windowToken,0)
-        }
-    }
-
-    private fun searchAddress(key: String, address: String) {
-        val interceptor = HttpLoggingInterceptor()
-        interceptor.apply { interceptor.level = HttpLoggingInterceptor.Level.BODY }
-
-        val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-        val retrofit = GoogleMapsRequestApi.setClient(client)
-        val service = retrofit.create(GoogleMapsPlaceService::class.java)
-        val repo = GoogleMapsPlaceRepositoryImpl(service)
-
-        // FLAVOR
-        val flavor = appId
-
-        repo.getPlaceDetailsById(key, address, {
-            val detail = it?.results?.first()
-            val categories = detail?.types
-            val lat = detail?.geometry?.location?.lat
-            val long = detail?.geometry?.location?.lng
-            val name = detail?.name
-            var cats = ""
-
-            if (categories != null) {
-                for (cat in categories) {
-                    cats += "$cat; "
-                }
-            }
-
-            Log.i("CATS", cats)
-            updateMap(LatLng(lat!!, long!!), name!!)
-
-        }, {
-            Log.d(LOG_TAG, it?.localizedMessage.toString())
-        })
-    }
-
-    private fun loadMap(root: View, savedInstanceState: Bundle?) {
+    private fun loadMap(root: View, savedInstanceState: Bundle?): Boolean {
 
         mapView = root.findViewById(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.onResume() // needed to get the map to display immediately
+        mapView.onResume()
 
         try {
             MapsInitializer.initialize(requireActivity().applicationContext)
+            Places.initialize(requireActivity().applicationContext, mapsApiKey);
+
+            autocompleteFragment = childFragmentManager.findFragmentById(R.id.map_autocomplete) as AutocompleteSupportFragment
+            autocompleteFragment.setPlaceFields(
+                listOf(
+                    Place.Field.ID,
+                    Place.Field.NAME,
+                    Place.Field.ADDRESS,
+                    Place.Field.LAT_LNG,
+                    Place.Field.PHONE_NUMBER,
+                    Place.Field.TYPES
+                )
+            )
+
+            autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+
+                override fun onPlaceSelected(place: Place) {
+
+                    selectedPlace = MapModel()
+                    selectedPlace.id = place.id
+                    selectedPlace.name = place.name
+                    selectedPlace.address = place.address
+                    selectedPlace.latlong = place.latLng
+                    selectedPlace.phone = place.phoneNumber
+                    selectedPlace.types = place.types
+                    selectedPlace.isAutoComplete = true
+
+                    updateMap(selectedPlace)
+                }
+
+                override fun onError(status: Status) {
+
+                    Log.i(LOG_TAG, status.toString())
+                }
+            })
+
         } catch (e: Exception) {
-            Log.d(LOG_TAG, e.localizedMessage.toString())
+            Log.e(LOG_TAG, e.toString())
+            return false
         }
 
         mapView.getMapAsync(this)
+
+        return true
+    }
+
+    private fun updateMap(latlong: LatLng) {
+
+        selectedPlace = MapModel()
+        selectedPlace.latlong = latlong
+
+        updateMap(selectedPlace)
+    }
+
+    private fun updateMap(place: MapModel) {
+
+        try {
+
+            if(!place.isAutoComplete) {
+
+                val geocoder = Geocoder(this.context)
+                val addressList: List<Address> = geocoder.getFromLocation(
+                    place.getLat(),
+                    place.getLong(),
+                    1
+                )
+
+                place.name = if (place.name!!.isEmpty() && !TextUtils.isDigitsOnly(addressList[0].featureName)) {
+                    addressList[0].featureName
+                } else if (place.name!!.isEmpty() && TextUtils.isDigitsOnly(addressList[0].featureName)){
+                    addressList[0].subLocality + " " + addressList[0].subThoroughfare + ", " + addressList[0].subAdminArea
+                } else {
+                    place.name!!
+                }
+
+                place.address = addressList[0].getAddressLine(0)
+            }
+
+            val options = MarkerOptions()
+            options.position(place.latlong!!)
+            options.title(place.name)
+            options.draggable(true)
+
+            map.addMarker(options).showInfoWindow()
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.latlong, defaultZoom))
+
+        } catch (e: IOException) {
+            Log.d(LOG_TAG, e.localizedMessage.toString())
+        }
+    }
+
+    private fun setDefaultAdress() {
+
+        selectedPlace = MapModel()
+        selectedPlace.name = "FIAP"
+        selectedPlace.latlong = defaultAddress
+
+        updateMap(selectedPlace)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
 
         map = googleMap
         map.uiSettings.isZoomControlsEnabled = true
-
-        updateMap(defaultAddress, "FIAP" )
-
+        map.uiSettings.isRotateGesturesEnabled = false
+        map.setMinZoomPreference(10F)
+        map.setMaxZoomPreference(18F)
         map.setOnMarkerDragListener(this)
         map.setOnMapClickListener(this)
+
+        setDefaultAdress()
     }
-
-    override fun onMarkerDragStart(movedPoint: Marker) { }
-
-    override fun onMarkerDrag(movedPoint: Marker) { }
-
-    override fun onMarkerDragEnd(movedPoint: Marker) { updateMap(LatLng(movedPoint.position.latitude, movedPoint.position.longitude)) }
 
     override fun onMapClick(clickedPoint: LatLng) { updateMap(clickedPoint) }
 
-    private fun updateMap(latlong: LatLng, name: String = "") {
+    //do nothing - here just because it's an override mandatory
+    override fun onMarkerDragStart(movedPoint: Marker) { }
+    override fun onMarkerDrag(movedPoint: Marker) { }
 
-        val geocoder = Geocoder(this.context)
-
-        try {
-
-            val addressList: List<Address> = geocoder.getFromLocation(latlong.latitude, latlong.longitude, 1)
-
-
-            var placeCustomName = ""
-            // Tratamento de placeName
-            placeCustomName = if (name.isEmpty() && !TextUtils.isDigitsOnly(addressList[0].featureName)) {
-                addressList[0].featureName
-            } else if (name.isEmpty() && TextUtils.isDigitsOnly(addressList[0].featureName)){
-                addressList[0].subLocality + " " + addressList[0].subThoroughfare + ", " + addressList[0].subAdminArea
-            } else {
-                name
-            }
-
-            val placeName: String = placeCustomName
-            val address: String = addressList[0].getAddressLine(0)
-
-            val options: MarkerOptions = MarkerOptions()
-            options.position(latlong)
-            options.title(placeName)
-            options.draggable(true)
-
-//            map.clear()
-            map.addMarker(options).showInfoWindow()
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlong, defaultZoom))
-
-        } catch (e: IOException) {
-            Log.d(LOG_TAG, e.localizedMessage.toString())
-        }
-    }
+    override fun onMarkerDragEnd(movedPoint: Marker) { updateMap(
+        LatLng(
+            movedPoint.position.latitude,
+            movedPoint.position.longitude
+        )
+    ) }
 
     override fun onResume() {
 

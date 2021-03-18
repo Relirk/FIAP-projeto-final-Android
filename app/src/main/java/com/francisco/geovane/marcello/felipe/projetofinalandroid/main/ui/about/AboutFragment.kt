@@ -21,7 +21,11 @@ class AboutFragment : Fragment() {
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "About"
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         analytics = FirebaseAnalytics.getInstance(context)
         AnalyticsUtils.setPageData(analytics, bundle, appId, pageId)
@@ -36,10 +40,13 @@ class AboutFragment : Fragment() {
 
     private fun setInfos(root: View) {
 
-        val version: String = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName
+        val version: String = requireContext().packageManager.getPackageInfo(
+            requireContext().packageName,
+            0
+        ).versionName
 
         val appName: TextView = root.findViewById(R.id.text_app_name)
-        appName.setText(R.string.app_name)
+        //appName.setText(R.string.app_name)
 
         val appVersion: TextView = root.findViewById(R.id.text_app_version_number)
         appVersion.text = version
@@ -56,7 +63,31 @@ class AboutFragment : Fragment() {
             "Marcello Chuahy   - RM 337780"
         )
 
-        val arrayAdapter: ArrayAdapter<String> = ArrayAdapter<String>(root.context, R.layout.list_item, R.id.text_info, arr)
+        val arrayAdapter: ArrayAdapter<String> = ArrayAdapter<String>(
+            root.context,
+            R.layout.list_item,
+            R.id.text_info,
+            arr
+        )
         list.adapter = arrayAdapter
+
+        ajustDevelopedByListHeight(arrayAdapter, list)
+    }
+
+    private fun ajustDevelopedByListHeight(arrayAdapter: ArrayAdapter<String>, list: ListView) {
+
+        var listHeight = 0
+
+        for (i in 0 until arrayAdapter.count) {
+
+            val listItem: View = arrayAdapter.getView(i, null, list)
+            listItem.measure(0, 0)
+            listHeight += listItem.measuredHeight
+        }
+
+        val listParam: ViewGroup.LayoutParams = list.layoutParams
+        listParam.height = listHeight + list.dividerHeight * (arrayAdapter.count - 1)
+        list.layoutParams = listParam
+        list.requestLayout()
     }
 }
