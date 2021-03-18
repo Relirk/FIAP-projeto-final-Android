@@ -32,12 +32,8 @@
     <string name="txt_cancel">Cancel</string>
 
     <!-- maps page -->
-    <string name="search_for_new_places">Search for new places!</string>
-    <string name="txt_fill_address">Fill an address!</string>
-    <string name="txt_address">Address</string>
-    <string name="txt_search">Search</string>
     <string name="txt_reset">Reset</string>
-    <string name="add_new_location">Add new location!</string>
+    <string name="txt_save_location">Save location!</string>
 
     <!-- about page -->
     <string name="about_version">Version</string>
