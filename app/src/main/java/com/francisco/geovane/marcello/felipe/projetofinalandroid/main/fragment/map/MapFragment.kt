@@ -1,5 +1,6 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map
 
+import android.Manifest
 import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
@@ -27,6 +28,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.gson.Gson
 import java.io.IOException
+
 
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener {

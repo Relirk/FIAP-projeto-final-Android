@@ -103,7 +103,7 @@ class LoginActivity : BaseActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    analytics.setUserId(user.toString())
+                    firebaseAnalytics.setUserId(user.toString())
                     updateUI(user)
                     progressBar.visibility = View.GONE
                 } else {
