@@ -6,9 +6,13 @@
 
     <string name="sign_up">Sign Up</string>
     <string name="have_account">I already have an account</string>
-
     <string name="email">E-mail</string>
     <string name="password">Password</string>
+    <string name="validate_pw_length">Password must be at least 6 characters long</string>
+    <string name="validate_pw_empty">Please enter a password</string>
+    <string name="validate_email_valid">Please enter a valid email</string>
+    <string name="validate_email">Please enter an email</string>
+    <string name="validate_user_exists">User already exists in the system</string>
 
     <!--  logout page  -->
     <string name="logout_title">Logout</string>
@@ -16,10 +20,15 @@
     <string name="logout_confirm">Confirm</string>
     <string name="logout_cancel">Cancel</string>
 
+    <string name="sign_up_error_create">Sign Up failed. Try again after some time.</string>
+    <string name="login_error_create">Falha na autenticação. Verifique seus dados e tente novamente.</string>
+
+    <!--  Main  -->
     <string name="title_activity_main">MainActivity</string>
     <string name="title_welcome">Welcome</string>
     <string name="description_welcome">Register your places to walk and always find something new!</string>
 
+    <!--  Tab  -->
     <string name="title_map">Map</string>
     <string name="title_list">List</string>
     <string name="title_about">About</string>

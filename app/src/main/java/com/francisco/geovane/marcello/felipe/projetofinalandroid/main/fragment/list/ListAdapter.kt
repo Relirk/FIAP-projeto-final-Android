@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
@@ -18,6 +19,7 @@ import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.Place
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.item_place_row.view.*
 
@@ -31,10 +33,10 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "List"
 
-    private lateinit var btnEdit: Button
-    private lateinit var btnShare: Button
-    private lateinit var btnCall: Button
-    private lateinit var btnDelete: Button
+    private lateinit var btnEdit: CardView
+    private lateinit var btnShare: FloatingActionButton
+    private lateinit var btnCall: FloatingActionButton
+    private lateinit var btnDelete: FloatingActionButton
 
     private val firebasePlaceService = FirebasePlaceService()
 
@@ -82,7 +84,7 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
             itemView.description.text = place.description
             itemView.phone.text = place.phoneNumber
 
-            btnEdit = itemView.findViewById(R.id.btn_edit)
+            btnEdit = itemView.findViewById(R.id.go_to_edit)
             btnShare = itemView.findViewById(R.id.btn_share)
             btnCall = itemView.findViewById(R.id.btn_call)
             btnDelete = itemView.findViewById(R.id.btn_delete)

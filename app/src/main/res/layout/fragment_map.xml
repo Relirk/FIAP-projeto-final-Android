@@ -45,8 +45,7 @@
         android:layout_marginStart="10dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:alpha="0.8"
-        >
+        android:alpha="0.8">
 
         <LinearLayout
             android:id="@+id/bottom_buttons"
@@ -54,9 +53,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="5dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            >
+            android:layout_gravity="center_horizontal">
 
             <Button
                 android:id="@+id/btn_reset"
@@ -64,6 +61,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:text="@string/txt_reset"
+                android:layout_marginEnd="5dp"
+                android:layout_marginStart="5dp"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="14sp"
@@ -75,7 +74,8 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
                 android:text="@string/txt_save_location"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"

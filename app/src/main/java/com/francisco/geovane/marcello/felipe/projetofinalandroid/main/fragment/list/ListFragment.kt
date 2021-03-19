@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -23,30 +24,33 @@ import com.google.firebase.analytics.FirebaseAnalytics
 class ListFragment : Fragment() {
 
     private var bundle: Bundle = Bundle()
-    private lateinit var analytics: FirebaseAnalytics
-
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "List"
 
+    private lateinit var analytics: FirebaseAnalytics
     private lateinit var adapter: ListAdapter
     private lateinit var listViewModel: ListViewModel
+    private lateinit var progressBar: ProgressBar
+    private lateinit var btnAdd: FloatingActionButton
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
         analytics = FirebaseAnalytics.getInstance(context)
         AnalyticsUtils.setPageData(analytics, bundle, appId, pageId)
 
-        //requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        listViewModel = ViewModelProvider(this).get(ListViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_list, container, false)
 
-        val recyclerView = root.findViewById<RecyclerView>(R.id.ListView)
+        progressBar = root.findViewById(R.id.list_spinner)
+        btnAdd = root.findViewById(R.id.btn_add)
+        recyclerView = root.findViewById(R.id.ListView)
+
         adapter = ListAdapter(root.context)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(root.context)
-        listViewModel = ViewModelProvider(this).get(ListViewModel::class.java)
+
         bringItens()
 
-        val btnAdd: FloatingActionButton = root.findViewById(R.id.btn_add)
         btnAdd.setOnClickListener {
             AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "AddNew")
 
@@ -74,11 +78,8 @@ class ListFragment : Fragment() {
         listViewModel.fetchPlaces().observe(viewLifecycleOwner, Observer {
             adapter.setList(it)
             adapter.notifyDataSetChanged()
+            progressBar.visibility = View.GONE
         })
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        //requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-    }
 }

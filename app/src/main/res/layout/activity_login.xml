@@ -52,6 +52,14 @@
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="18sp" />
+
+        <ProgressBar
+            android:id="@+id/login_spinner"
+            android:layout_height="75dp"
+            android:layout_width="75dp"
+            android:indeterminate="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"/>
     </LinearLayout>
 
     <Button
@@ -65,6 +73,7 @@
         android:textAllCaps="false"
         android:textSize="18sp"
         android:layout_alignParentBottom="true"/>
+
 
 
 </RelativeLayout>

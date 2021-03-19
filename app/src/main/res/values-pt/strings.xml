@@ -6,9 +6,13 @@
 
     <string name="sign_up">Cadastrar</string>
     <string name="have_account">Já tenho conta!</string>
-
     <string name="email">E-mail</string>
     <string name="password">Senha</string>
+    <string name="validate_pw_length">A senha precisa ter no mínimo 6 caractéres</string>
+    <string name="validate_pw_empty">Por favor insira uma senha</string>
+    <string name="validate_email_valid">Por favor insira um e-mail válido</string>
+    <string name="validate_email">Por favor insira um e-mail</string>
+    <string name="validate_user_exists">Usuário já existe no sistema</string>
 
     <!--  logout page  -->
     <string name="logout_title">Sair</string>
@@ -16,10 +20,16 @@
     <string name="logout_confirm">Sair</string>
     <string name="logout_cancel">Cancelar</string>
 
+
+    <string name="sign_up_error_create">Falha no cadastro. Tente novamente depois de algum tempo.</string>
+    <string name="login_error_create">Falha na autenticação. Verifique seus dados e tente novamente.</string>
+
+    <!--  Main  -->
     <string name="title_activity_main">MainActivity</string>
     <string name="title_welcome">Bem-vindo</string>
     <string name="description_welcome">Registre seus lugares para passeio e sempre ache algo novo!</string>
 
+    <!-- Tab -->
     <string name="title_map">Mapa</string>
     <string name="title_list">Listagem</string>
     <string name="title_about">Sobre</string>
