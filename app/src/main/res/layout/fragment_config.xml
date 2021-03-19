@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bgColorPrimary"
-    tools:context=".main.ui.config.ConfigFragment">
+    tools:context=".main.fragment.config.ConfigFragment">
 
     <TextView
         android:id="@+id/text_language"
@@ -38,8 +38,8 @@
 
         <ImageView
             android:id="@+id/img_flag_enUS"
-            android:layout_width="128px"
-            android:layout_height="128px"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
             android:layout_weight="1"
             android:layout_gravity="start"
             android:alpha="1"
@@ -47,8 +47,8 @@
 
         <ImageView
             android:id="@+id/img_flag_ptBR"
-            android:layout_width="128px"
-            android:layout_height="128px"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
             android:layout_weight="1"
             android:layout_gravity="end"
             android:alpha="1"

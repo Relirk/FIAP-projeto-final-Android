@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context=".main.ui.about.AboutFragment"
+    tools:context=".main.fragment.about.AboutFragment"
     >
     <LinearLayout
         android:id="@+id/root"

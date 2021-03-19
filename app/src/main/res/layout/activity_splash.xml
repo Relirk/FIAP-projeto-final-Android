@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fillViewport="true"
-    tools:context=".splash.SplashActivity"
+    tools:context=".main.activity.splash.SplashActivity"
     >
     <LinearLayout
         android:layout_width="match_parent"

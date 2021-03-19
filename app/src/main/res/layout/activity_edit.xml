@@ -1,79 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".main.activity.edit.EditPlaceActivity">
 
-    <LinearLayout
-        xmlns:tools="http://schemas.android.com/tools"
-        android:orientation="vertical"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:padding="16dp"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
-        <ImageView
-            android:id="@+id/etPlaceImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:contentDescription="@string/item_image"
-            tools:srcCompat="@tools:sample/avatars" />
-
-        <EditText
-            android:id="@+id/etPlaceName"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:hint="@string/placeholder_place_name"
-            android:inputType="text"
-            android:autofillHints=""
-            android:textSize="18sp" />
+            app:titleTextColor="@color/white"
+            android:background="?attr/colorPrimary">
 
-        <EditText
-            android:id="@+id/etPlaceAddress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:hint="@string/placeholder_place_address"
-            android:inputType="text"
-            android:autofillHints=""
-            android:textSize="18sp" />
+        </androidx.appcompat.widget.Toolbar>
 
-        <EditText
-            android:id="@+id/etPlaceDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:hint="@string/placeholder_place_description"
-            android:inputType="text"
-            android:autofillHints=""
-            android:textSize="18sp" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <EditText
-            android:id="@+id/etPlacePhone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:hint="@string/placeholder_place_phone"
-            android:inputType="phone"
-            android:autofillHints=""
-            android:textSize="18sp" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="70dp">
 
-        <CheckBox
-            android:id="@+id/etPlaceVisited"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/placeholder_place_visited"
-            tools:ignore="UseSwitchCompatOrMaterialXml"
-            android:textSize="18sp" />
+            android:padding="16dp"
+            android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_marginTop="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:text="@string/edit_save_button"
-            />
-    </LinearLayout>
-</ScrollView>
+            <ImageView
+                android:id="@+id/etPlaceImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@string/item_image"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <EditText
+                android:id="@+id/etPlaceName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:hint="@string/placeholder_place_name"
+                android:inputType="text"
+                android:autofillHints=""
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/etPlaceAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:hint="@string/placeholder_place_address"
+                android:inputType="text"
+                android:autofillHints=""
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/etPlaceDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:hint="@string/placeholder_place_description"
+                android:inputType="text"
+                android:autofillHints=""
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/etPlacePhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:hint="@string/placeholder_place_phone"
+                android:inputType="phone"
+                android:autofillHints=""
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/etPlaceVisited"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/placeholder_place_visited"
+                tools:ignore="UseSwitchCompatOrMaterialXml"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_marginTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:text="@string/edit_save_button"
+                />
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,4 +5,7 @@
 
     <color name="backgroundColor">#E0E0E0</color>
     <color name="bgInput">#EEEEEE</color>
+
+    <color name="ToolbarColorPrimary">#FF5722</color>
+    <color name="ToolbarColorPrimaryDark">#E64A19</color>
 </resources>

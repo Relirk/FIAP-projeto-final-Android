@@ -20,18 +20,17 @@
         android:theme="@style/Theme.ProjetoFinalAndroid"
         android:name="androidx.multidex.MultiDexApplication" >
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="${mapsApiKey}" />
-        <activity android:name=".main.MainActivity" android:label="@string/title_activity_main" />
-        <activity android:name=".splash.SplashActivity">
+        <activity android:name=".main.activity.MainActivity" android:label="@string/title_activity_main" />
+        <activity android:name="com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.splash.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".main.ui.list.edit.EditPlaceActivity"
-            android:parentActivityName=".main.MainActivity"/>
-        <activity android:name=".login.SignUpActivity" />
-        <activity android:name=".login.LoginActivity" />
+        <activity android:name=".main.activity.edit.EditPlaceActivity" android:theme="@style/Theme.ProjetoFinalAndroid.NoActionBar"/>
+        <activity android:name=".main.activity.login.SignUpActivity" />
+        <activity android:name=".main.activity.login.LoginActivity" />
     </application>
 
 </manifest>

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bgColorPrimary"
-    tools:context=".main.ui.map.MapFragment">
+    tools:context=".main.fragment.map.MapFragment">
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
