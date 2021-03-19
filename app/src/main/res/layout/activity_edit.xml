@@ -45,6 +45,13 @@
                 android:contentDescription="@string/item_image"
                 tools:srcCompat="@tools:sample/avatars" />
 
+            <Button
+                android:id="@+id/btnUpload"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Upload image" />
+
             <EditText
                 android:id="@+id/etPlaceName"
                 android:layout_width="match_parent"

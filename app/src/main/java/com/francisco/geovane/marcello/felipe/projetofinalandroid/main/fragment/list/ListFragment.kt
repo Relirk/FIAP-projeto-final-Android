@@ -1,5 +1,6 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list
 
+import android.R.attr
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +22,7 @@ import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.e
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.analytics.FirebaseAnalytics
+
 
 class ListFragment : Fragment() {
 
@@ -34,7 +37,11 @@ class ListFragment : Fragment() {
     private lateinit var btnAdd: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         analytics = FirebaseAnalytics.getInstance(context)
         AnalyticsUtils.setPageData(analytics, bundle, appId, pageId)
 
@@ -66,9 +73,13 @@ class ListFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         //super.startActivityForResult(data, resultCode)
 
-        if (resultCode == Activity.RESULT_OK) {
-            Log.d(ContentValues.TAG, "Document return: $data")
+
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 10001 && resultCode == Activity.RESULT_OK) {
+            val ft: FragmentTransaction = requireFragmentManager().beginTransaction()
+            ft.detach(this).attach(this).commit();
         }
+
         /*for (fragment in supportFragmentManager.fragments) {
             fragment.onActivityResult(requestCode, resultCode, data)
         }*/
