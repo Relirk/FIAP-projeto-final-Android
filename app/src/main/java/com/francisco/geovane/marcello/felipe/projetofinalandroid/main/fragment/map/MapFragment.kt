@@ -1,8 +1,11 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map
 
 import android.Manifest
+import android.content.DialogInterface
+import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
+import android.location.Location
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -10,16 +13,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.fragment.app.Fragment
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.FirebaseUtils
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
@@ -27,6 +36,7 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.gson.Gson
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
 
 
@@ -38,14 +48,24 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     private lateinit var mapsApiKey: String
 
     private var LOG_TAG = "myLog__"
+    private var globalSavedInstanceState: Bundle? = null
     private var bundle: Bundle = Bundle()
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "Map"
+    private val REQUEST_CODE = 200
 
+    private lateinit var globalRoot: View
     private lateinit var mapView: MapView
     private lateinit var map: GoogleMap
     private lateinit var selectedPlace: MapModel
     private lateinit var autocompleteFragment: AutocompleteSupportFragment
+    private lateinit var currentLocation: Location
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private var PERMISSIONS = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+    )
+
 
     // default location on map - FIAP - Campus Paulista
     private val defaultAddress = LatLng(-23.5641095, -46.65240989999999)
@@ -57,6 +77,11 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_map, container, false)
+        globalSavedInstanceState = savedInstanceState
+        globalRoot = root
+
+        val btnReset: Button = root.findViewById(R.id.btn_reset)
+        val btnAdd: Button = root.findViewById(R.id.btn_add)
 
         // Analytics
         analytics = FirebaseAnalytics.getInstance(context)
@@ -66,31 +91,72 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         remoteConfig = FirebaseUtils.fetchRemoteConfig()
         mapsApiKey = remoteConfig.getString("google_maps_api_key")
 
-        if(loadMap(root, savedInstanceState)) {
 
-            val btnReset: Button = root.findViewById(R.id.btn_reset)
-            btnReset.setOnClickListener {
+        btnReset.setOnClickListener {
+            map.clear()
+            autocompleteFragment.setText("")
+            setDefaultAdress()
+        }
 
-                map.clear()
-                autocompleteFragment.setText("")
-                setDefaultAdress()
-            }
+        btnAdd.setOnClickListener {
+            //TODO: utilizar 'selectedPlace' para obter as informações que serão salvas no DB
+            Log.i(LOG_TAG, Gson().toJson(selectedPlace))
+        }
 
-            val btnAdd: Button = root.findViewById(R.id.btn_add)
-            btnAdd.setOnClickListener {
 
-                //TODO: utilizar 'selectedPlace' para obter as informações que serão salvas no DB
-                Log.i(LOG_TAG, Gson().toJson(selectedPlace))
-            }
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity);
+        if (checkSelfPermission(requireActivity().applicationContext, PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(this.PERMISSIONS, REQUEST_CODE)
+        } else {
+            initMap()
         }
 
         return root
     }
 
-    private fun loadMap(root: View, savedInstanceState: Bundle?): Boolean {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    initMap()
+                } else {
+                    context?.let {
+                        AlertDialog.Builder(it)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle("Permissão negada")
+                            .setMessage("Para usar as funcionalidades do mapa a permissão de localização é necessária, caso tenha selecionado por 'não perguntar novamente' verifique as configurações do seu dispositivo, do contrário acesse novamente a guia Mapa")
+                            .setPositiveButton("Yes",
+                                DialogInterface.OnClickListener { dialog, _ ->
+                                   dialog.dismiss()
+                                })
+                            .show()
+                    }
+                }
+            }
+        }
+    }
 
-        mapView = root.findViewById(R.id.mapView) as MapView
-        mapView.onCreate(savedInstanceState)
+    private fun initMap() {
+        if (checkSelfPermission(
+                requireActivity().applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED) {
+            val task: Task<*> = fusedLocationProviderClient.lastLocation
+            task.addOnSuccessListener { location ->
+                if (location != null) currentLocation = location as Location
+                loadMap()
+            }
+        }
+    }
+
+    private fun loadMap(): Boolean {
+        mapView = globalRoot.findViewById(R.id.mapView) as MapView
+        mapView.onCreate(globalSavedInstanceState)
         mapView.onResume()
 
         try {
@@ -221,9 +287,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         )
     ) }
 
-    override fun onResume() {
-
-        super.onResume()
-        mapView.onResume()
-    }
+//    override fun onResume() {
+//
+//        super.onResume()
+//        mapView.onResume()
+//    }
 }
