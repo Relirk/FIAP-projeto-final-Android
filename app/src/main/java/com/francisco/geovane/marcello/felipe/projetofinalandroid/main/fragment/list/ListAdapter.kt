@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.Place
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -25,7 +25,7 @@ import kotlinx.android.synthetic.main.item_place_row.view.*
 
 class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapter.AdapterHolder>() {
 
-    private var placeList = mutableListOf<Place>()
+    private var placeList = mutableListOf<LocationObj>()
 
     private var bundle: Bundle = Bundle()
     private lateinit var analytics: FirebaseAnalytics
@@ -40,7 +40,7 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
 
     private val firebasePlaceService = FirebasePlaceService()
 
-    fun setList(list: MutableList<Place>) {
+    fun setList(list: MutableList<LocationObj>) {
         placeList = list
     }
 
@@ -78,7 +78,7 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
     }
 
     inner class AdapterHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        fun bindView(place: Place, position: Int) {
+        fun bindView(place: LocationObj, position: Int) {
             Glide.with(context).load(place.image).into(itemView.imageView)
             itemView.name.text = place.name
             itemView.description.text = place.description

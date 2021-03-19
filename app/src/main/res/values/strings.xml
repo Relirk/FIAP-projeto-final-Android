@@ -43,6 +43,7 @@
     <!-- maps page -->
     <string name="txt_reset">Reset</string>
     <string name="txt_save_location">Save location!</string>
+    <string name="user_location">You are here! </string>
 
     <!-- about page -->
     <string name="about_version">Version</string>
@@ -87,13 +88,9 @@
 
 
     <!--  PERMISSÕES  -->
-    <string name="app_name">Permission</string>
-    <string name="make_call">Make a Call</string>
-    <string name="never_ask_again_dialog">Para que possamos fazer ligações através do app é preciso que acesse as configurações do sistema e conceda manual a permissão. Caso concorde, clique no botão de ir para as configurações.</string>
-    <string name="go_to_settings">Ir para as configurações!</string>
-    <string name="permission_dialog_title">Permissão</string>
-    <string name="more_info_dialog">Para que possamos fazer ligações através do app é preciso que nos conceda permissão.</string>
-    <string name="yes">Sim</string>
-    <string name="no">Não</string>
-    <string name="permission_denied">Permissão foi recusada.</string>
+    <string name="perm_denied_title">Permission denied</string>
+    <string name="perm_denied_description">To use the map features, the location permission is required, if you have selected for \'do not ask again\' check your device settings, otherwise access the Map tab again</string>
+    <string name="perm_denied_ok">OK</string>
+
+
 </resources>
