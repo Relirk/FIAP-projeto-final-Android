@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.Place
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -14,12 +14,12 @@ class FirebasePlaceService {
     val db = Firebase.firestore
     private var appId: String = BuildConfig.APP_ID
 
-    fun getAllLocations():LiveData<MutableList<Place>> {
-        val users = MutableLiveData<MutableList<Place>>()
+    fun getAllLocations():LiveData<MutableList<LocationObj>> {
+        val users = MutableLiveData<MutableList<LocationObj>>()
         db.collection("Locations")
             .get()
             .addOnSuccessListener { result ->
-                val listPlaces = mutableListOf<Place>()
+                val listPlaces = mutableListOf<LocationObj>()
                 for (document in result) {
                     val id = document.id
                     val name = document.getString("name")
@@ -31,7 +31,7 @@ class FirebasePlaceService {
                     val phoneNumber = document.getString("phoneNumber")
                     val imageUrl = document.getString("image")
                     val flavor = document.getString("flavor")
-                    val place = Place(
+                    val place = LocationObj(
                             id!!,
                             name!!,
                             description!!,
@@ -56,7 +56,7 @@ class FirebasePlaceService {
         return users
     }
 
-    fun saveNewLocation(fields: Place) {
+    fun saveNewLocation(fields: LocationObj) {
         db.collection("Locations")
             .add(mapOf(
                     "name" to fields.name,
@@ -74,7 +74,7 @@ class FirebasePlaceService {
             }
     }
 
-    fun saveEditedLocation(id: String, fields: Place) {
+    fun saveEditedLocation(id: String, fields: LocationObj) {
         val fieldRef = db.collection("Locations").document(id)
 
         fieldRef

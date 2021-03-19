@@ -2,6 +2,7 @@ package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.
 
 import android.Manifest
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
@@ -13,18 +14,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.fragment.app.Fragment
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.FirebaseUtils
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -35,17 +38,15 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
 
 
-@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@Suppress(
+    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+    "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+)
 class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener {
-    
-    private lateinit var analytics: FirebaseAnalytics
-    private lateinit var remoteConfig: FirebaseRemoteConfig
-    private lateinit var mapsApiKey: String
 
     private var LOG_TAG = "myLog__"
     private var globalSavedInstanceState: Bundle? = null
@@ -54,6 +55,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     private var pageId: String = "Map"
     private val REQUEST_CODE = 200
 
+    private lateinit var params: Bundle
+    private lateinit var initialMarker: Marker
+    private lateinit var marker: Marker
+    private lateinit var analytics: FirebaseAnalytics
+    private lateinit var remoteConfig: FirebaseRemoteConfig
+    private lateinit var mapsApiKey: String
     private lateinit var globalRoot: View
     private lateinit var mapView: MapView
     private lateinit var map: GoogleMap
@@ -65,11 +72,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
     )
-
-
-    // default location on map - FIAP - Campus Paulista
-    private val defaultAddress = LatLng(-23.5641095, -46.65240989999999)
-    private val defaultZoom = 16F
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -99,8 +101,18 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         }
 
         btnAdd.setOnClickListener {
-            //TODO: utilizar 'selectedPlace' para obter as informações que serão salvas no DB
-            Log.i(LOG_TAG, Gson().toJson(selectedPlace))
+            val intent = Intent(context, EditPlaceActivity::class.java)
+            params = Bundle()
+            params.putString("id", selectedPlace.id)
+            params.putString("name", selectedPlace.name)
+            params.putString("phoneNumber", selectedPlace.phone)
+            params.putString("address", selectedPlace.address)
+            params.putString("lat", selectedPlace.latlong?.latitude.toString())
+            params.putString("lng", selectedPlace.latlong?.longitude.toString())
+            params.putString("flavor", appId)
+            params.putString("action", "ADD")
+            intent.putExtras(params)
+            startActivity(intent)
         }
 
 
@@ -125,14 +137,14 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     initMap()
                 } else {
-                    context?.let {
+                   context?.let {
                         AlertDialog.Builder(it)
                             .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setTitle("Permissão negada")
-                            .setMessage("Para usar as funcionalidades do mapa a permissão de localização é necessária, caso tenha selecionado por 'não perguntar novamente' verifique as configurações do seu dispositivo, do contrário acesse novamente a guia Mapa")
-                            .setPositiveButton("Yes",
+                            .setTitle(resources?.getString(R.string.perm_denied_title))
+                            .setMessage(resources?.getString(R.string.perm_denied_description))
+                            .setPositiveButton(resources?.getString(R.string.perm_denied_ok),
                                 DialogInterface.OnClickListener { dialog, _ ->
-                                   dialog.dismiss()
+                                    dialog.dismiss()
                                 })
                             .show()
                     }
@@ -176,9 +188,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             )
 
             autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-
                 override fun onPlaceSelected(place: Place) {
-
                     selectedPlace = MapModel()
                     selectedPlace.id = place.id
                     selectedPlace.name = place.name
@@ -188,7 +198,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                     selectedPlace.types = place.types
                     selectedPlace.isAutoComplete = true
 
-                    updateMap(selectedPlace)
+                    updateMap(selectedPlace, false)
                 }
 
                 override fun onError(status: Status) {
@@ -207,20 +217,23 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         return true
     }
 
-    private fun updateMap(latlong: LatLng) {
-
+    private fun updateMapWithCoordinates(latlong: LatLng) {
+        val geocoder = Geocoder(this.context)
+        val addressList: List<Address> = geocoder.getFromLocation(
+            marker.position.latitude,
+            marker.position.longitude,
+            1
+        )
         selectedPlace = MapModel()
         selectedPlace.latlong = latlong
+//        selectedPlace.id = place.id
 
-        updateMap(selectedPlace)
+        updateMap(selectedPlace, false)
     }
 
-    private fun updateMap(place: MapModel) {
-
+    private fun updateMap(place: MapModel, firstRun: Boolean) {
         try {
-
             if(!place.isAutoComplete) {
-
                 val geocoder = Geocoder(this.context)
                 val addressList: List<Address> = geocoder.getFromLocation(
                     place.getLat(),
@@ -242,10 +255,20 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             val options = MarkerOptions()
             options.position(place.latlong!!)
             options.title(place.name)
-            options.draggable(true)
+            options.draggable(false)
 
-            map.addMarker(options).showInfoWindow()
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.latlong, defaultZoom))
+            if (firstRun){
+                options.icon(BitmapDescriptorFactory.fromResource(R.drawable.smile))
+                initialMarker= map.addMarker(options)
+                initialMarker.showInfoWindow()
+            } else {
+                options.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
+                marker = map.addMarker(options)
+                this.marker.showInfoWindow()
+            }
+
+            map.animateCamera(CameraUpdateFactory.newLatLng(place.latlong))
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(place.latlong, 16f))
 
         } catch (e: IOException) {
             Log.d(LOG_TAG, e.localizedMessage.toString())
@@ -253,16 +276,15 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     }
 
     private fun setDefaultAdress() {
-
+        val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
         selectedPlace = MapModel()
-        selectedPlace.name = "FIAP"
-        selectedPlace.latlong = defaultAddress
+        selectedPlace.name = resources?.getString(R.string.user_location)
+        selectedPlace.latlong = latLng
 
-        updateMap(selectedPlace)
+        updateMap(selectedPlace, true)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-
         map = googleMap
         map.uiSettings.isZoomControlsEnabled = true
         map.uiSettings.isRotateGesturesEnabled = false
@@ -274,22 +296,16 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         setDefaultAdress()
     }
 
-    override fun onMapClick(clickedPoint: LatLng) { updateMap(clickedPoint) }
+    override fun onMapClick(clickedPoint: LatLng) {
+        if(this::marker.isInitialized){
+            marker.remove()
+            updateMapWithCoordinates(clickedPoint)
+        } else {
+            updateMapWithCoordinates(clickedPoint)
+        }
+    }
 
-    //do nothing - here just because it's an override mandatory
     override fun onMarkerDragStart(movedPoint: Marker) { }
     override fun onMarkerDrag(movedPoint: Marker) { }
-
-    override fun onMarkerDragEnd(movedPoint: Marker) { updateMap(
-        LatLng(
-            movedPoint.position.latitude,
-            movedPoint.position.longitude
-        )
-    ) }
-
-//    override fun onResume() {
-//
-//        super.onResume()
-//        mapView.onResume()
-//    }
+    override fun onMarkerDragEnd(movedPoint: Marker) {  }
 }

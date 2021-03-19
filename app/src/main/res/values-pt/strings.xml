@@ -44,6 +44,7 @@
     <!-- maps page -->
     <string name="txt_reset">Limpar</string>
     <string name="txt_save_location">Salvar local!</string>
+    <string name="user_location">Você está aqui!</string>
 
     <!-- about page -->
     <string name="about_version">Versão</string>
@@ -87,5 +88,7 @@
     <string name="edit_save_button">Salvar</string>
 
     <!-- PERMISSÕES -->
-
+    <string name="perm_denied_title">Permissão negada</string>
+    <string name="perm_denied_description">Para usar as funcionalidades do mapa a permissão de localização é necessária, caso tenha selecionado por \'não perguntar novamente\' verifique as configurações do seu dispositivo, do contrário acesse novamente a guia Mapa</string>
+    <string name="perm_denied_ok">Entendi</string>
 </resources>

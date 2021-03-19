@@ -43,6 +43,7 @@
     <!-- maps page -->
     <string name="txt_reset">Reset</string>
     <string name="txt_save_location">Save location!</string>
+    <string name="user_location">You are here! </string>
 
     <!-- about page -->
     <string name="about_version">Version</string>
@@ -87,5 +88,9 @@
 
 
     <!--  PERMISSÕES  -->
+    <string name="perm_denied_title">Permission denied</string>
+    <string name="perm_denied_description">To use the map features, the location permission is required, if you have selected for \'do not ask again\' check your device settings, otherwise access the Map tab again</string>
+    <string name="perm_denied_ok">OK</string>
+
 
 </resources>

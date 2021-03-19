@@ -93,6 +93,54 @@
                 tools:ignore="UseSwitchCompatOrMaterialXml"
                 android:textSize="18sp" />
 
+            <LinearLayout
+                android:id="@+id/bottom_buttons"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="5dp"
+                android:layout_gravity="center_horizontal">
+                <EditText
+                    android:id="@+id/etPlaceLat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:fontFamily="sans-serif-light"
+                    android:hint="Latitude"
+                    android:inputType="none"
+                    android:autofillHints=""
+                    android:textSize="18sp"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"/>
+
+                <EditText
+                    android:id="@+id/etPlaceLng"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:fontFamily="sans-serif-light"
+                    android:hint="Longitude"
+                    android:inputType="none"
+                    android:autofillHints=""
+                    android:textSize="18sp"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"/>
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/etPlaceFlavor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:hint="Flavor"
+                android:inputType="none"
+                android:autofillHints=""
+                android:textSize="18sp"
+                android:focusable="false"
+                android:focusableInTouchMode="false"/>/>
+
             <Button
                 android:id="@+id/btnSave"
                 android:layout_marginTop="16dp"

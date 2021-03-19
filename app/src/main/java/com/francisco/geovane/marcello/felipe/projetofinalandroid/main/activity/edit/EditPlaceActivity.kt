@@ -3,18 +3,18 @@ package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
-
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.Place
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
+import kotlinx.android.synthetic.main.activity_edit.*
 
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -25,7 +25,19 @@ class EditPlaceActivity : AppCompatActivity() {
     private lateinit var etPlaceAddress: EditText
     private lateinit var etPlaceDescription: EditText
     private lateinit var etPlacePhone: EditText
+    private lateinit var etPlaceLat: EditText
+    private lateinit var etPlaceLng: EditText
+    private lateinit var etPlaceFlavor: EditText
     private lateinit var etPlaceVisited: CheckBox
+    private lateinit var params: Bundle
+
+    private var id: String? = null
+    private var name: String? = null
+    private var phoneNumber:String? = null
+    private var address: String? = null
+    private var lat: String? = null
+    private var lng: String? = null
+    private var flavor: String? = null
 
     private var appId: String = BuildConfig.APP_ID
 
@@ -35,12 +47,27 @@ class EditPlaceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit)
 
+        etPlaceImage = findViewById(R.id.etPlaceImage)
+        etPlaceName = findViewById(R.id.etPlaceName)
+        etPlaceAddress = findViewById(R.id.etPlaceAddress)
+        etPlaceDescription = findViewById(R.id.etPlaceDescription)
+        etPlacePhone = findViewById(R.id.etPlacePhone)
+        etPlaceVisited = findViewById(R.id.etPlaceVisited)
+        etPlaceLat = findViewById(R.id.etPlaceLat)
+        etPlaceLng= findViewById(R.id.etPlaceLng)
+        etPlaceFlavor = findViewById(R.id.etPlaceFlavor)
+
+        etPlaceLat.inputType = InputType.TYPE_NULL;
+        etPlaceLng.inputType = InputType.TYPE_NULL;
+        etPlaceFlavor.inputType = InputType.TYPE_NULL;
+
         supportActionBar?.hide()
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
 
         val action = intent.getStringExtra("action")
         if(action != null) {
             toolbar.title = resources?.getString(R.string.new_place_title)
+            setCreationFields(intent)
         } else {
             toolbar.title = resources?.getString(R.string.edit_place_title)
             setDataFields()
@@ -59,18 +86,17 @@ class EditPlaceActivity : AppCompatActivity() {
                 ).show()
             } else {
                 val id = intent.getStringExtra("id")
-                //inserir lat e lng quando a info vier do mapa
-                val place = Place(
+                val place = LocationObj(
                     id.toString(),
                     etPlaceName.text.toString(),
                     etPlaceDescription.text.toString(),
-                    null,
-                    null,
+                    etPlaceLat.text.toString().toInt(),
+                    etPlaceLng.text.toString().toInt(),
                     etPlaceVisited.isChecked,
                     etPlacePhone.text.toString(),
                     etPlaceAddress.text.toString(),
                     "",
-                    appId
+                    etPlaceFlavor.text.toString()
                 )
                 if (id != null) {
                     firebasePlaceService.saveEditedLocation(id, place)
@@ -100,28 +126,40 @@ class EditPlaceActivity : AppCompatActivity() {
 
     private fun setDataFields() {
         val originalImage = intent.getStringExtra("image")
-        etPlaceImage = findViewById(R.id.etPlaceImage)
         Glide.with(applicationContext).load(originalImage).into(etPlaceImage)
 
         val originalName = intent.getStringExtra("name")
-        etPlaceName = findViewById(R.id.etPlaceName)
         etPlaceName.setText(originalName)
 
         val originalAddress = intent.getStringExtra("address")
-        etPlaceAddress = findViewById(R.id.etPlaceAddress)
         etPlaceAddress.setText(originalAddress)
 
         val originalDescription = intent.getStringExtra("description")
-        etPlaceDescription = findViewById(R.id.etPlaceDescription)
         etPlaceDescription.setText(originalDescription)
 
         val originalPhone = intent.getStringExtra("phone")
-        etPlacePhone = findViewById(R.id.etPlacePhone)
         etPlacePhone.setText(originalPhone)
 
         val originalVisit = intent.getStringExtra("isVisited")
         val isVisited = originalVisit.toBoolean()
-        etPlaceVisited = findViewById(R.id.etPlaceVisited)
+
         etPlaceVisited.setChecked(isVisited)
+    }
+
+    private fun setCreationFields(intent: Intent) {
+        id = intent.getStringExtra("id");
+        name = intent.getStringExtra("name");
+        phoneNumber = intent.getStringExtra("phoneNumber");
+        address = intent.getStringExtra("address");
+        lat = intent.getStringExtra("lat");
+        lng = intent.getStringExtra("lng");
+        flavor = intent.getStringExtra("flavor");
+
+        etPlaceName.setText(name)
+        etPlacePhone.setText(phoneNumber)
+        etPlaceAddress.setText(address)
+        etPlaceLat.setText(lat)
+        etPlaceLng.setText(lng)
+        etPlaceFlavor.setText(flavor)
     }
 }
