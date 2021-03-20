@@ -12,6 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.cardview.widget.CardView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
@@ -33,6 +36,7 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "List"
 
+    private lateinit var listViewModel: ListViewModel
     private lateinit var btnEdit: CardView
     private lateinit var btnShare: FloatingActionButton
     private lateinit var btnCall: FloatingActionButton
@@ -71,8 +75,10 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
                 firebasePlaceService.deleteLocation(id)
                 dialog.dismiss()
             }
-            .setNegativeButton(R.string.cancel_exclusion) {
-                    dialog, _ -> dialog.dismiss()
+            .setNegativeButton(R.string.cancel_exclusion) { dialog, _ ->
+                val fragment: Fragment = ListFragment()
+                fragment.requireActivity().recreate()
+                dialog.dismiss()
             }
             .create()
     }
@@ -89,14 +95,7 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
             btnCall = itemView.findViewById(R.id.btn_call)
             btnDelete = itemView.findViewById(R.id.btn_delete)
 
-            //Clicar na row e ir para o MapFragment
-            itemView.setOnClickListener {
-
-            }
-
             btnEdit.setOnClickListener {
-                //AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "addPlace")
-
                 val intent = Intent(itemView.context, EditPlaceActivity::class.java)
                 intent.putExtra("id", place.id)
                 intent.putExtra("image", place.image)
@@ -110,12 +109,10 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
             }
 
             btnDelete.setOnClickListener {
-                //AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "deletePlace")
                 confirmExclusion(place.id).show()
             }
 
             btnCall.setOnClickListener {
-                //AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "callToPlace")
                 val intent = Intent(Intent.ACTION_DIAL)
                 intent.data = Uri.parse("tel:${place.phoneNumber}")
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -123,7 +120,6 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
             }
 
             btnShare.setOnClickListener {
-                //AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "sharePlace")
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.putExtra(
                     Intent.EXTRA_TEXT,
