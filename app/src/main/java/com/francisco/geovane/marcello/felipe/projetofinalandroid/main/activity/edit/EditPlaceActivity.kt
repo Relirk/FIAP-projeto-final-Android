@@ -1,14 +1,17 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit
 
 import android.annotation.SuppressLint
+
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
+
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
@@ -44,7 +47,8 @@ class EditPlaceActivity : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit)
-
+        supportActionBar?.hide()
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         etPlaceImage = findViewById(R.id.etPlaceImage)
         etPlaceName = findViewById(R.id.etPlaceName)
         etPlaceAddress = findViewById(R.id.etPlaceAddress)
@@ -58,9 +62,6 @@ class EditPlaceActivity : AppCompatActivity() {
         etPlaceLat.inputType = InputType.TYPE_NULL
         etPlaceLng.inputType = InputType.TYPE_NULL
         etPlaceFlavor.inputType = InputType.TYPE_NULL
-
-        supportActionBar?.hide()
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
 
         // Firebase
         auth = Firebase.auth
