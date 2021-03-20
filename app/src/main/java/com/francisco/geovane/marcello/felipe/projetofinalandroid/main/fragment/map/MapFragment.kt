@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.FirebaseUtils
 import com.google.android.gms.common.api.Status
@@ -40,6 +39,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
+import java.util.*
 
 
 @Suppress(
@@ -49,11 +49,11 @@ import java.io.IOException
 class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener {
 
     private var LOG_TAG = "myLog__"
+    private val REQUEST_CODE = 200
     private var globalSavedInstanceState: Bundle? = null
     private var bundle: Bundle = Bundle()
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "Map"
-    private val REQUEST_CODE = 200
 
     private lateinit var params: Bundle
     private lateinit var initialMarker: Marker
@@ -137,7 +137,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     initMap()
                 } else {
-                   context?.let {
+                    context?.let {
                         AlertDialog.Builder(it)
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .setTitle(resources?.getString(R.string.perm_denied_title))
@@ -224,6 +224,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             marker.position.longitude,
             1
         )*/
+        val geocoder = Geocoder(this.context)
         selectedPlace = MapModel()
         selectedPlace.latlong = latlong
 //        selectedPlace.id = place.id
@@ -257,7 +258,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             options.title(place.name)
             options.draggable(false)
 
-            if (firstRun){
+            if (firstRun) {
                 options.icon(BitmapDescriptorFactory.fromResource(R.drawable.smile))
                 initialMarker= map.addMarker(options)
                 initialMarker.showInfoWindow()

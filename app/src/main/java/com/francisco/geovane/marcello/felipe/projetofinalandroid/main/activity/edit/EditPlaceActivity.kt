@@ -16,14 +16,14 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
 import com.github.dhaval2404.imagepicker.ImagePicker
-import kotlinx.android.synthetic.main.activity_edit.*
 import kotlinx.android.synthetic.main.item_place_row.*
-import java.io.File
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -38,7 +38,7 @@ class EditPlaceActivity : AppCompatActivity() {
     private lateinit var etPlaceLng: EditText
     private lateinit var etPlaceFlavor: EditText
     private lateinit var etPlaceVisited: CheckBox
-    private lateinit var params: Bundle
+    private lateinit var auth: FirebaseAuth
 
     private var id: String? = null
     private var name: String? = null
@@ -47,9 +47,6 @@ class EditPlaceActivity : AppCompatActivity() {
     private var lat: String? = null
     private var lng: String? = null
     private var flavor: String? = null
-
-    private var appId: String = BuildConfig.APP_ID
-
     private val firebasePlaceService = FirebasePlaceService()
 
     private val OPERATION_CHOOSE_PHOTO: Int = 2
@@ -68,14 +65,15 @@ class EditPlaceActivity : AppCompatActivity() {
         etPlaceLng= findViewById(R.id.etPlaceLng)
         etPlaceFlavor = findViewById(R.id.etPlaceFlavor)
 
-        etPlaceLat.inputType = InputType.TYPE_NULL;
-        etPlaceLng.inputType = InputType.TYPE_NULL;
-        etPlaceFlavor.inputType = InputType.TYPE_NULL;
+        etPlaceLat.inputType = InputType.TYPE_NULL
+        etPlaceLng.inputType = InputType.TYPE_NULL
+        etPlaceFlavor.inputType = InputType.TYPE_NULL
 
         supportActionBar?.hide()
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
 
-        setFields()
+        // Firebase
+        auth = Firebase.auth
 
         val action = intent.getStringExtra("action")
         if(action != null) {
@@ -118,23 +116,24 @@ class EditPlaceActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
-                val id = intent.getStringExtra("id")
                 val place = LocationObj(
                     id.toString(),
                     etPlaceName.text.toString(),
                     etPlaceDescription.text.toString(),
-                    etPlaceLat.text.toString().toInt(),
-                    etPlaceLng.text.toString().toInt(),
+                    etPlaceLat.text.toString(),
+                    etPlaceLng.text.toString(),
                     etPlaceVisited.isChecked,
                     etPlacePhone.text.toString(),
                     etPlaceAddress.text.toString(),
                     "",
-                    etPlaceFlavor.text.toString()
+                    etPlaceFlavor.text.toString(),
+                    auth.currentUser?.uid
                 )
-                if (id != null) {
-                    firebasePlaceService.saveEditedLocation(id, place)
-                } else {
+                if ( action != null) {
                     firebasePlaceService.saveNewLocation(place)
+                } else {
+                    val id = intent.getStringExtra("id")
+                    firebasePlaceService.saveEditedLocation(id, place)
                 }
                 setResult(RESULT_OK, replyIntent)
                 finish()
@@ -233,44 +232,36 @@ class EditPlaceActivity : AppCompatActivity() {
         }
     }*/
 
-    private fun setFields() {
-        etPlaceImage = findViewById(R.id.etPlaceImage)
-        etPlaceName = findViewById(R.id.etPlaceName)
-        etPlaceAddress = findViewById(R.id.etPlaceAddress)
-        etPlaceDescription = findViewById(R.id.etPlaceDescription)
-        etPlacePhone = findViewById(R.id.etPlacePhone)
-        etPlaceVisited = findViewById(R.id.etPlaceVisited)
-    }
-
     private fun setDataFields() {
         val originalImage = intent.getStringExtra("image")
-        Glide.with(applicationContext).load(originalImage).into(etPlaceImage)
-
         val originalName = intent.getStringExtra("name")
-        etPlaceName.setText(originalName)
-
         val originalAddress = intent.getStringExtra("address")
-        etPlaceAddress.setText(originalAddress)
-
         val originalDescription = intent.getStringExtra("description")
-        etPlaceDescription.setText(originalDescription)
-
         val originalPhone = intent.getStringExtra("phone")
-        etPlacePhone.setText(originalPhone)
+        val originalVisit = intent.getStringExtra("isVisited").toBoolean()
+        lat = intent.getStringExtra("lat")
+        lng = intent.getStringExtra("lng")
+        flavor = intent.getStringExtra("flavor")
 
-        val originalVisit = intent.getStringExtra("isVisited")
-        val isVisited = originalVisit.toBoolean()
-        etPlaceVisited.setChecked(isVisited)
+        Glide.with(applicationContext).load(originalImage).into(etPlaceImage)
+        etPlaceName.setText(originalName)
+        etPlaceAddress.setText(originalAddress)
+        etPlaceDescription.setText(originalDescription)
+        etPlacePhone.setText(originalPhone)
+        etPlaceVisited.isChecked = originalVisit
+        etPlaceLat.setText(lat)
+        etPlaceLng.setText(lng)
+        etPlaceFlavor.setText(flavor)
     }
 
     private fun setCreationFields(intent: Intent) {
-        id = intent.getStringExtra("id");
-        name = intent.getStringExtra("name");
-        phoneNumber = intent.getStringExtra("phoneNumber");
-        address = intent.getStringExtra("address");
-        lat = intent.getStringExtra("lat");
-        lng = intent.getStringExtra("lng");
-        flavor = intent.getStringExtra("flavor");
+        id = intent.getStringExtra("id")
+        name = intent.getStringExtra("name")
+        phoneNumber = intent.getStringExtra("phoneNumber")
+        address = intent.getStringExtra("address")
+        lat = intent.getStringExtra("lat")
+        lng = intent.getStringExtra("lng")
+        flavor = intent.getStringExtra("flavor")
 
         etPlaceName.setText(name)
         etPlacePhone.setText(phoneNumber)

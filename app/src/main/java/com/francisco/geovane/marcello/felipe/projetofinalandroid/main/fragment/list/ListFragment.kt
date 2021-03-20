@@ -85,7 +85,7 @@ class ListFragment : Fragment() {
         }*/
     }
 
-    fun bringItens() {
+     fun bringItens() {
         listViewModel.fetchPlaces().observe(viewLifecycleOwner, Observer {
             adapter.setList(it)
             adapter.notifyDataSetChanged()
