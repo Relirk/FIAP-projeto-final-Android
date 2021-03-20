@@ -10,18 +10,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.item_place_row.view.*
@@ -104,6 +101,9 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
                 intent.putExtra("description", place.description)
                 intent.putExtra("phone", place.phoneNumber)
                 intent.putExtra("isVisited", place.isVisited.toString())
+                intent.putExtra("lat", place.lat.toString())
+                intent.putExtra("lng", place.lng.toString())
+                intent.putExtra("flavor", place.flavor.toString())
                 itemView.context.startActivity(intent)
                 Log.d(TAG, "Document ID: ${place.id}")
             }
@@ -126,9 +126,10 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
                     """${place.name}
                     |${place.description}
                     |${place.address}
-                    |https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}""".trimMargin())
+                    |https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}""".trimMargin()
+                )
                 intent.type = "text/plain"
-                context.startActivity(Intent.createChooser(intent,"Share To:"))
+                context.startActivity(Intent.createChooser(intent, "Share To:"))
             }
 
         }
