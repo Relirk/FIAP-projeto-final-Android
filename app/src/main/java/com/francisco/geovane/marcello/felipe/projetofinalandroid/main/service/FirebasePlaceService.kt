@@ -12,14 +12,16 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
+import java.util.*
 import kotlin.properties.Delegates
 
 class FirebasePlaceService {
     private val db = Firebase.firestore
     private var appId: String = BuildConfig.APP_ID
 
-    private var imageRef: StorageReference? = Firebase.storage.reference.child("locations")
+    private var imageRef: StorageReference? = Firebase.storage.reference.child("locations/")
 
     private lateinit var auth: FirebaseAuth
     private lateinit var nameField: String
@@ -170,7 +172,8 @@ class FirebasePlaceService {
                 "address" to fields.address,
                 "description" to fields.description,
                 "phoneNumber" to fields.phoneNumber,
-                "isVisited" to fields.isVisited
+                "isVisited" to fields.isVisited,
+                "image" to fields.image
             ))
             .addOnSuccessListener {
                 Log.d("Firebase", "Document ${fields.name} saved successful! ")
@@ -188,13 +191,28 @@ class FirebasePlaceService {
             .addOnFailureListener { e -> Log.w(TAG, "Error deleting document $id", e) }
     }
 
-    fun uploadImage(imageURI: Uri) {
-        val upload = imageRef?.child("locations/")?.putFile(imageURI)
-        upload?.addOnSuccessListener {
-            Log.e("CloudStorage", "Image upload successfully!")
-            //dar um return do link de download aqui
+    fun uploadImage(imageURI: Uri): String {
+        val ref = imageRef?.child("${UUID.randomUUID()}")
+        val upload = ref?.putFile(imageURI)
+        var uriString: String = ""
+        upload?.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            ref.downloadUrl
+        }
+        ?.addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            uriString = task.result.toString()
+        } else {
+            Log.d("FAILED", "Image download capture failed ")
+        }
+        //dar um return do link de download aqui
         }?.addOnFailureListener {
             Log.e(TAG, "Image upload failed ")
         }
+        return uriString
     }
 }

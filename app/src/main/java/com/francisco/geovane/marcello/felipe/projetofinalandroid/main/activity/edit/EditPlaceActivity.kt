@@ -3,27 +3,26 @@ package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
-import android.provider.MediaStore
-import android.util.Log
 import android.text.InputType
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
 import com.github.dhaval2404.imagepicker.ImagePicker
-import kotlinx.android.synthetic.main.item_place_row.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import java.io.File
 
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -49,7 +48,7 @@ class EditPlaceActivity : AppCompatActivity() {
     private var flavor: String? = null
     private val firebasePlaceService = FirebasePlaceService()
 
-    private val OPERATION_CHOOSE_PHOTO: Int = 2
+    private lateinit var newImage: Uri
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,17 +87,6 @@ class EditPlaceActivity : AppCompatActivity() {
 
         val uploadButton = findViewById<Button>(R.id.btnUpload)
         uploadButton.setOnClickListener {
-            // PHOTO
-            /*val photoPickerIntent = Intent(Intent.ACTION_PICK)
-            photoPickerIntent.type = "image/*"
-            Log.d("IMAGE", "$photoPickerIntent")
-            startActivityForResult(photoPickerIntent, SELECT_PHOTO)*/
-             */
-
-            //GET IMAGE
-            /*val intent = Intent("android.intent.action.GET_CONTENT")
-            intent.type = "image/*"
-            startActivityForResult(intent, OPERATION_CHOOSE_PHOTO)*/*/
             ImagePicker.with(this)
                 .crop()
                 .compress(1024)
@@ -109,6 +97,7 @@ class EditPlaceActivity : AppCompatActivity() {
         val saveButton = findViewById<Button>(R.id.btnSave)
         saveButton.setOnClickListener {
             val replyIntent = Intent()
+            var imgUri: String
             if (etPlaceName.text.toString().trim().isEmpty()) {
                 Toast.makeText(
                     applicationContext,
@@ -116,6 +105,10 @@ class EditPlaceActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
+                if (newImage.toString().isNotEmpty()) {
+                    Log.d("SELECTED_IMAGE", "$newImage")
+                }
+
                 val place = LocationObj(
                     id.toString(),
                     etPlaceName.text.toString(),
@@ -125,7 +118,7 @@ class EditPlaceActivity : AppCompatActivity() {
                     etPlaceVisited.isChecked,
                     etPlacePhone.text.toString(),
                     etPlaceAddress.text.toString(),
-                    "",
+                    setUploadData(newImage),
                     etPlaceFlavor.text.toString(),
                     auth.currentUser?.uid
                 )
@@ -158,26 +151,13 @@ class EditPlaceActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        /*when(requestCode){
-            OPERATION_CHOOSE_PHOTO ->
-                if (resultCode == Activity.RESULT_OK) {
-                    if (data != null) {
-                        //handleImage(data)
-                    }
-                }
-        }*/
 
         if (resultCode == Activity.RESULT_OK) {
-            //Image Uri will not be null for RESULT_OK
             val fileUri = data?.data
-            imageView.setImageURI(fileUri)
-
-            //You can get File object from intent
-            //val file: File = ImagePicker.getFile(data)!!
-
-            //You can also get File Path from intent
-            val filePath: String = ImagePicker.getFilePath(data)!!
-            Log.d("filePath", "Image: $filePath")
+            if (fileUri != null) {
+                newImage = fileUri
+            }
+            Glide.with(applicationContext).load(fileUri).into(etPlaceImage)
         } else if (resultCode == ImagePicker.RESULT_ERROR) {
             Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
         } else {
@@ -185,52 +165,20 @@ class EditPlaceActivity : AppCompatActivity() {
         }
     }
 
-    /*private fun renderImage(imagePath: String?){
-        if (imagePath != null) {
-            val bitmap = BitmapFactory.decodeFile(imagePath)
-            etPlaceImage?.setImageBitmap(bitmap)
-        }
-        else {
-            Toast.makeText(
-                applicationContext,
-                "Image is null",
-                Toast.LENGTH_LONG
-            ).show()
-        }
+    private fun setUploadData(Uri: Uri): String {
+        var realUri: String = ""
+        realUri = firebasePlaceService.uploadImage(Uri)
+        return realUri
     }
 
-    private fun getImagePath(uri: Uri?, selection: String?): String {
-        var path: String? = null
-        val cursor = uri?.let {
-            contentResolver.query(it, null, selection, null, null ) }
-        if (cursor != null){
-            if (cursor.moveToFirst()) {
-                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
-            }
-            cursor.close()
+    fun fetchPlaces() : LiveData<MutableList<LocationObj>> {
+        val placesList = MutableLiveData<MutableList<LocationObj>>()
+        firebasePlaceService.getAllLocations().observeForever {
+                result ->
+            placesList.value = result
         }
-        return path!!
+        return placesList
     }
-
-    private fun handleImage(data: Intent) {
-        var imagePath: String? = null
-        val uri = data.data
-
-        if (DocumentsContract.isDocumentUri(this, uri)) {
-            val docId = DocumentsContract.getDocumentId(uri)
-            if (uri != null) {
-                if ("com.android.providers.media.documents" == uri.authority) {
-                    val id = docId.split(":")[1]
-                    val storage = MediaStore.Images.Media._ID + "=" + id
-                    imagePath = getImagePath(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        storage
-                    )
-                    Log.d("Image pathhh", "$imagePath")
-                }
-            }
-        }
-    }*/
 
     private fun setDataFields() {
         val originalImage = intent.getStringExtra("image")
