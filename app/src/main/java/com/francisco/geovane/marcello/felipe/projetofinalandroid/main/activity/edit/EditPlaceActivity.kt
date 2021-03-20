@@ -20,7 +20,10 @@ import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
+import com.github.dhaval2404.imagepicker.ImagePicker
 import kotlinx.android.synthetic.main.activity_edit.*
+import kotlinx.android.synthetic.main.item_place_row.*
+import java.io.File
 
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -95,9 +98,14 @@ class EditPlaceActivity : AppCompatActivity() {
              */
 
             //GET IMAGE
-            val intent = Intent("android.intent.action.GET_CONTENT")
+            /*val intent = Intent("android.intent.action.GET_CONTENT")
             intent.type = "image/*"
-            startActivityForResult(intent, OPERATION_CHOOSE_PHOTO)
+            startActivityForResult(intent, OPERATION_CHOOSE_PHOTO)*/*/
+            ImagePicker.with(this)
+                .crop()
+                .compress(1024)
+                .maxResultSize(1080, 1080)
+                .start()
         }
 
         val saveButton = findViewById<Button>(R.id.btnSave)
@@ -151,17 +159,34 @@ class EditPlaceActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when(requestCode){
+        /*when(requestCode){
             OPERATION_CHOOSE_PHOTO ->
                 if (resultCode == Activity.RESULT_OK) {
                     if (data != null) {
-                        handleImage(data)
+                        //handleImage(data)
                     }
                 }
+        }*/
+
+        if (resultCode == Activity.RESULT_OK) {
+            //Image Uri will not be null for RESULT_OK
+            val fileUri = data?.data
+            imageView.setImageURI(fileUri)
+
+            //You can get File object from intent
+            //val file: File = ImagePicker.getFile(data)!!
+
+            //You can also get File Path from intent
+            val filePath: String = ImagePicker.getFilePath(data)!!
+            Log.d("filePath", "Image: $filePath")
+        } else if (resultCode == ImagePicker.RESULT_ERROR) {
+            Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun renderImage(imagePath: String?){
+    /*private fun renderImage(imagePath: String?){
         if (imagePath != null) {
             val bitmap = BitmapFactory.decodeFile(imagePath)
             etPlaceImage?.setImageBitmap(bitmap)
@@ -206,7 +231,7 @@ class EditPlaceActivity : AppCompatActivity() {
                 }
             }
         }
-    }
+    }*/
 
     private fun setFields() {
         etPlaceImage = findViewById(R.id.etPlaceImage)

@@ -122,6 +122,7 @@ dependencies {
 
     // LIBS DE TERCEIROS
     implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.github.dhaval2404:imagepicker:1.8'
 
     // NOSSA LIB CRIADA
     implementation 'com.github.Relirk:ProjetoFinalAndroidLib:1.0.1'

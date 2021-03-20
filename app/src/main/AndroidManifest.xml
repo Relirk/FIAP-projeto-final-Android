@@ -10,7 +10,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.FLAG_GRANT_WRITE_URI_PERMISSION"/>
     <application
         android:allowBackup="true"
         android:icon="@drawable/logo"
@@ -18,6 +21,7 @@
         android:label="${appLabel}"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         tools:replace="android:icon, android:roundIcon"
         android:theme="@style/Theme.ProjetoFinalAndroid"
         android:name="androidx.multidex.MultiDexApplication" >

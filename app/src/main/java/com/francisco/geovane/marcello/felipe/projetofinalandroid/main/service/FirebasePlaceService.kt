@@ -132,6 +132,7 @@ class FirebasePlaceService {
         val upload = imageRef?.child("locations/")?.putFile(imageURI)
         upload?.addOnSuccessListener {
             Log.e("CloudStorage", "Image upload successfully!")
+            //dar um return do link de download aqui
         }?.addOnFailureListener {
             Log.e(TAG, "Image upload failed ")
         }

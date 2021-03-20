@@ -218,12 +218,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     }
 
     private fun updateMapWithCoordinates(latlong: LatLng) {
-        val geocoder = Geocoder(this.context)
+        /*val geocoder = Geocoder(this.context)
         val addressList: List<Address> = geocoder.getFromLocation(
             marker.position.latitude,
             marker.position.longitude,
             1
-        )
+        )*/
         selectedPlace = MapModel()
         selectedPlace.latlong = latlong
 //        selectedPlace.id = place.id
