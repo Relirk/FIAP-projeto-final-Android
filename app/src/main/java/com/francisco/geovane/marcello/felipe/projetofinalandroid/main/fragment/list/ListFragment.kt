@@ -18,23 +18,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.analytics.FirebaseAnalytics
-
 
 class ListFragment : Fragment() {
 
-    private var pageId: String = "List"
-    private var bundle: Bundle = Bundle()
-    private var appId: String = BuildConfig.APP_ID
+//    private var pageId: String = "List"
+//    private var bundle: Bundle = Bundle()
+//    private var appId: String = BuildConfig.APP_ID
+//
+//    private val firebasePlaceService = FirebasePlaceService()
 
-    private lateinit var analytics: FirebaseAnalytics
     private lateinit var adapter: ListAdapter
     private lateinit var listViewModel: ListViewModel
     private lateinit var progressBar: ProgressBar
-    private lateinit var btnAdd: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
     private lateinit var swipeLayout: SwipeRefreshLayout
 
@@ -53,6 +49,7 @@ class ListFragment : Fragment() {
         adapter = ListAdapter(root.context)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(root.context)
+
 
         return root
     }
@@ -84,7 +81,10 @@ class ListFragment : Fragment() {
         bringItens()
     }
 
-    override fun onPause() { super.onPause() }
+    override fun onPause() {
+        super.onPause()
+        bringItens()
+    }
 
      fun bringItens() {
         listViewModel.fetchPlaces().observe(viewLifecycleOwner, Observer {
@@ -94,5 +94,4 @@ class ListFragment : Fragment() {
         })
          Handler().postDelayed(Runnable { swipeLayout.isRefreshing = false }, 3000)
     }
-
 }

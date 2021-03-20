@@ -17,8 +17,4 @@ class ListViewModel : ViewModel() {
         }
         return placesList
     }
-    /*private val _text = MutableLiveData<String>().apply {
-        value = "This is list Fragment"
-    }
-    val text: LiveData<String> = _text*/
 }

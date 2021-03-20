@@ -39,7 +39,11 @@ class FirebasePlaceService {
         val users = MutableLiveData<MutableList<LocationObj>>()
         val listPlaces = mutableListOf<LocationObj>()
         auth = Firebase.auth
-        db.collection("Locations")
+
+        val locationRef = db.collection("Locations")
+        locationRef
+            .whereEqualTo("userId", auth.currentUser?.uid)
+            .whereEqualTo("flavor", appId)
             .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
@@ -53,6 +57,7 @@ class FirebasePlaceService {
                     val phoneNumber = document.getString("phoneNumber")
                     val imageUrl = document.getString("image")
                     val flavor = document.getString("flavor")
+                    val userId = document.getString("userId")
                     val place = LocationObj(
                         id,
                         name!!,
@@ -62,13 +67,13 @@ class FirebasePlaceService {
                         isVisited!!,
                         phoneNumber!!,
                         address!!,
-                        imageUrl!!,
-                        flavor!!,
-                        auth.currentUser?.uid
+                        imageUrl,
+                        flavor,
+                        userId
                     )
-                    if (place.flavor == appId) {
-                        listPlaces.add(place)
-                    }
+
+                    listPlaces.add(place)
+
                     Log.d(TAG, "DocumentSnapshot data: $document")
                 }
                 users.value = listPlaces
@@ -179,7 +184,7 @@ class FirebasePlaceService {
                 Log.d("Firebase", "Document ${fields.name} saved successful! ")
             }
             .addOnFailureListener { exception ->
-                Log.w(TAG, "Error saving document $id:", exception)
+                Log.d(TAG, "Error saving document $id:", exception)
             }
         }
     }
@@ -188,7 +193,7 @@ class FirebasePlaceService {
         db.collection("Locations").document(id)
             .delete()
             .addOnSuccessListener { Log.d(TAG, "Document $id deleted successful.") }
-            .addOnFailureListener { e -> Log.w(TAG, "Error deleting document $id", e) }
+            .addOnFailureListener { e -> Log.d(TAG, "Error deleting document $id", e) }
     }
 
     fun uploadImage(imageURI: Uri): String {

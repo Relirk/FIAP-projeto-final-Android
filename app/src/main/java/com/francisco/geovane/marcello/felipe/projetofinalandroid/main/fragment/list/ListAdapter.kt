@@ -1,39 +1,31 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.cardview.widget.CardView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.item_place_row.view.*
+
 
 class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapter.AdapterHolder>() {
 
     private var placeList = mutableListOf<LocationObj>()
 
-    private var bundle: Bundle = Bundle()
-    private lateinit var analytics: FirebaseAnalytics
-
-    private var appId: String = BuildConfig.APP_ID
-    private var pageId: String = "List"
-
-    private lateinit var listViewModel: ListViewModel
     private lateinit var btnEdit: CardView
     private lateinit var btnShare: FloatingActionButton
     private lateinit var btnCall: FloatingActionButton
@@ -63,18 +55,17 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
         holder.bindView(place, position)
     }
 
-    fun confirmExclusion(id: String): AlertDialog {
+    fun confirmExclusion(id: String, itemView: View): AlertDialog {
         return AlertDialog.Builder(context)
             .setTitle(R.string.title_exclusion)
             .setMessage(R.string.description_exclusion)
             .setIcon(R.drawable.ic_baseline_delete_24)
             .setPositiveButton(R.string.confirm_exclusion) { dialog, _ ->
                 firebasePlaceService.deleteLocation(id)
+                (context as Activity).recreate()
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.cancel_exclusion) { dialog, _ ->
-                val fragment: Fragment = ListFragment()
-                fragment.requireActivity().recreate()
                 dialog.dismiss()
             }
             .create()
@@ -109,7 +100,7 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
             }
 
             btnDelete.setOnClickListener {
-                confirmExclusion(place.id).show()
+                confirmExclusion(place.id, itemView).show()
             }
 
             btnCall.setOnClickListener {
