@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,19 +17,18 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.analytics.FirebaseAnalytics
 
 
 class ListFragment : Fragment() {
 
+    private var pageId: String = "List"
     private var bundle: Bundle = Bundle()
     private var appId: String = BuildConfig.APP_ID
-    private var pageId: String = "List"
 
     private lateinit var analytics: FirebaseAnalytics
     private lateinit var adapter: ListAdapter
@@ -36,42 +36,40 @@ class ListFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var btnAdd: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
+    private lateinit var swipeLayout: SwipeRefreshLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        analytics = FirebaseAnalytics.getInstance(context)
-        AnalyticsUtils.setPageData(analytics, bundle, appId, pageId)
 
         listViewModel = ViewModelProvider(this).get(ListViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_list, container, false)
 
         progressBar = root.findViewById(R.id.list_spinner)
-        btnAdd = root.findViewById(R.id.btn_add)
         recyclerView = root.findViewById(R.id.ListView)
 
         adapter = ListAdapter(root.context)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(root.context)
 
-        bringItens()
-
-        btnAdd.setOnClickListener {
-            AnalyticsUtils.setClickData(analytics, bundle, appId, pageId, "AddNew")
-
-            val intent = Intent(root.context, EditPlaceActivity::class.java)
-            intent.putExtra("action", "ADD")
-            root.context.startActivity(intent)
-        }
-
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        swipeLayout = view.findViewById<View>(R.id.refresher) as SwipeRefreshLayout
+        swipeLayout.setOnRefreshListener { bringItens() }
+        swipeLayout.setColorScheme(
+            android.R.color.holo_blue_bright,
+            android.R.color.holo_green_light,
+            android.R.color.holo_orange_light,
+            android.R.color.holo_red_light
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        //super.startActivityForResult(data, resultCode)
 
 
         super.onActivityResult(requestCode, resultCode, data)
@@ -79,11 +77,14 @@ class ListFragment : Fragment() {
             val ft: FragmentTransaction = requireFragmentManager().beginTransaction()
             ft.detach(this).attach(this).commit();
         }
-
-        /*for (fragment in supportFragmentManager.fragments) {
-            fragment.onActivityResult(requestCode, resultCode, data)
-        }*/
     }
+
+    override fun onResume() {
+        super.onResume()
+        bringItens()
+    }
+
+    override fun onPause() { super.onPause() }
 
      fun bringItens() {
         listViewModel.fetchPlaces().observe(viewLifecycleOwner, Observer {
@@ -91,6 +92,7 @@ class ListFragment : Fragment() {
             adapter.notifyDataSetChanged()
             progressBar.visibility = View.GONE
         })
+         Handler().postDelayed(Runnable { swipeLayout.isRefreshing = false }, 3000)
     }
 
 }
