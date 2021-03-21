@@ -1,21 +1,29 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service
 
 import android.content.ContentValues.TAG
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
+import com.google.firebase.storage.ktx.storage
+import java.util.*
 import kotlin.properties.Delegates
 
 class FirebasePlaceService {
     private val db = Firebase.firestore
     private val appId: String = BuildConfig.APP_ID
     private val defaultImage: String = "https://firebasestorage.googleapis.com/v0/b/fiapandroid.appspot.com/o/placeholders%2Flocation.png?alt=media&token=3c7ac60c-6ed1-4bac-b6a0-15bf61278cb4"
+
+    private var imageRef: StorageReference? = Firebase.storage.reference.child("locations/")
 
     private lateinit var auth: FirebaseAuth
     private lateinit var nameField: String
@@ -68,7 +76,7 @@ class FirebasePlaceService {
 
                     listPlaces.add(place)
 
-                    Log.d(TAG, "DocumentSnapshot data: $document")
+                    //Log.d(TAG, "DocumentSnapshot data: $document")
                 }
                 users.value = listPlaces
             }
@@ -99,6 +107,28 @@ class FirebasePlaceService {
             .addOnFailureListener { exception ->
                 Log.d(TAG, "Error saving new document:", exception)
             }
+    }
+
+    fun saveNewPlaces(places: Array<LocationObj>) {
+        for (place in places) {
+            db.collection("Locations")
+                .add({
+                    "name" to place.name;
+                    "address" to place.address;
+                    "description" to place.description;
+                    "lat" to place.lat;
+                    "lng" to place.lng;
+                    "phoneNumber" to place.phoneNumber;
+                    "isVisited" to place.isVisited;
+                    "flavor" to place.flavor;
+                })
+                .addOnSuccessListener {
+                    Log.d("Firebase", "Document ${place.name} saved successful! ")
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error saving new document:", exception)
+                }
+        }
     }
 
     private fun initializeFields(fields: LocationObj): LocationObj {
@@ -144,19 +174,20 @@ class FirebasePlaceService {
             val fieldRef = db.collection("Locations").document(id)
 
             fieldRef
-                .update(mapOf(
-                    "name" to fields.name,
-                    "address" to fields.address,
-                    "description" to fields.description,
-                    "phoneNumber" to fields.phoneNumber,
-                    "isVisited" to fields.isVisited
-                ))
-                .addOnSuccessListener {
-                    Log.d("Firebase", "Document ${fields.name} saved successful! ")
-                }
-                .addOnFailureListener { exception ->
-                    Log.d(TAG, "Error saving document $id:", exception)
-                }
+            .update(mapOf(
+                "name" to fields.name,
+                "address" to fields.address,
+                "description" to fields.description,
+                "phoneNumber" to fields.phoneNumber,
+                "isVisited" to fields.isVisited,
+                "image" to fields.image
+            ))
+            .addOnSuccessListener {
+                Log.d("Firebase", "Document ${fields.name} saved successful! ")
+            }
+            .addOnFailureListener { exception ->
+                Log.d(TAG, "Error saving document $id:", exception)
+            }
         }
     }
 
@@ -165,5 +196,28 @@ class FirebasePlaceService {
             .delete()
             .addOnSuccessListener { Log.d(TAG, "Document $id deleted successful.") }
             .addOnFailureListener { e -> Log.d(TAG, "Error deleting document $id", e) }
+    }
+
+    fun uploadImage(imageURI: Uri): Task<Uri>? {
+        val ref = imageRef?.child("${UUID.randomUUID()}")
+        val upload = ref?.putFile(imageURI)
+        var uriString: String = ""
+        return upload?.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            ref.downloadUrl
+        }
+        ?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                uriString = task.result.toString()
+            } else {
+                Log.d("FAILED", "Image download capture failed ")
+            }
+        }?.addOnFailureListener {
+            Log.e(TAG, "Image upload failed ")
+        }
     }
 }

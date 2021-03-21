@@ -110,7 +110,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics:17.4.0'
     implementation 'com.google.firebase:firebase-analytics:18.0.2'
     implementation 'com.google.firebase:firebase-config:20.0.4'
-    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.google.firebase:firebase-messaging:21.0.1'
 
     implementation 'com.firebaseui:firebase-ui-firestore:7.1.1'
@@ -123,6 +124,7 @@ dependencies {
 
     // LIBS DE TERCEIROS
     implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.github.dhaval2404:imagepicker:1.8'
 
     // NOSSA LIB CRIADA
     implementation 'com.github.Relirk:ProjetoFinalAndroidLib:1.0.1'

@@ -1,21 +1,24 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit
 
 import android.annotation.SuppressLint
-
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.text.InputType
-
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -33,6 +36,7 @@ class EditPlaceActivity : AppCompatActivity() {
     private lateinit var etPlaceLng: EditText
     private lateinit var etPlaceFlavor: EditText
     private lateinit var etPlaceVisited: CheckBox
+    private lateinit var progressBar: ProgressBar
     private lateinit var auth: FirebaseAuth
 
     private var id: String? = null
@@ -44,11 +48,15 @@ class EditPlaceActivity : AppCompatActivity() {
     private var flavor: String? = null
     private val firebasePlaceService = FirebasePlaceService()
 
+    private var newUrlUriImage: Task<Uri>? = null
+    private lateinit var localPathNewImage: Uri
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit)
         supportActionBar?.hide()
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        progressBar = findViewById(R.id.list_spinner)
         etPlaceImage = findViewById(R.id.etPlaceImage)
         etPlaceName = findViewById(R.id.etPlaceName)
         etPlaceAddress = findViewById(R.id.etPlaceAddress)
@@ -65,6 +73,7 @@ class EditPlaceActivity : AppCompatActivity() {
 
         // Firebase
         auth = Firebase.auth
+        progressBar.visibility = View.GONE
 
         val action = intent.getStringExtra("action")
         if(action != null) {
@@ -77,9 +86,23 @@ class EditPlaceActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
 
+        val uploadButton = findViewById<Button>(R.id.btnUpload)
+        uploadButton.setOnClickListener {
+            ImagePicker.with(this)
+                .crop()
+                .compress(1024)
+                .maxResultSize(1080, 1080)
+                .start()
+        }
+
         val saveButton = findViewById<Button>(R.id.btnSave)
         saveButton.setOnClickListener {
-            val replyIntent = Intent()
+            val imagePath = if(action == null) {
+                if (newUrlUriImage?.result != null) newUrlUriImage?.result else intent.getStringExtra("image")
+            } else {
+                newUrlUriImage?.result
+            }
+
             if (etPlaceName.text.toString().trim().isEmpty()) {
                 Toast.makeText(
                     applicationContext,
@@ -87,6 +110,7 @@ class EditPlaceActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
+
                 val place = LocationObj(
                     id.toString(),
                     etPlaceName.text.toString(),
@@ -96,7 +120,7 @@ class EditPlaceActivity : AppCompatActivity() {
                     etPlaceVisited.isChecked,
                     etPlacePhone.text.toString(),
                     etPlaceAddress.text.toString(),
-                    "",
+                    imagePath.toString(),
                     etPlaceFlavor.text.toString(),
                     auth.currentUser?.uid
                 )
@@ -106,7 +130,6 @@ class EditPlaceActivity : AppCompatActivity() {
                     val id = intent.getStringExtra("id")
                     firebasePlaceService.saveEditedLocation(id, place)
                 }
-                setResult(RESULT_OK, replyIntent)
                 finish()
             }
         }
@@ -124,6 +147,32 @@ class EditPlaceActivity : AppCompatActivity() {
         }
         else -> {
             super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun setUploadData(Uri: Uri) {
+        newUrlUriImage = firebasePlaceService.uploadImage(Uri)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            progressBar.visibility = View.VISIBLE
+            etPlaceImage.visibility = View.GONE
+
+            val fileUri = data?.data
+            if (fileUri != null) {
+                localPathNewImage = fileUri
+            }
+            setUploadData(localPathNewImage)
+            Handler().postDelayed(Runnable {
+                progressBar.visibility = View.GONE
+                etPlaceImage.visibility = View.VISIBLE
+                Glide.with(applicationContext).load(fileUri).into(etPlaceImage) }, 5000)
+        } else if (resultCode == ImagePicker.RESULT_ERROR) {
+            Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 

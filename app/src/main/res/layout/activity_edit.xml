@@ -37,13 +37,32 @@
             android:padding="16dp"
             android:layout_height="wrap_content">
 
+            <ProgressBar
+                android:id="@+id/list_spinner"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_gravity="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
             <ImageView
                 android:id="@+id/etPlaceImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:contentDescription="@string/item_image"
+                android:adjustViewBounds="true"
                 tools:srcCompat="@tools:sample/avatars" />
+
+            <Button
+                android:id="@+id/btnUpload"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/upload_button" />
 
             <EditText
                 android:id="@+id/etPlaceName"
@@ -107,7 +126,7 @@
                     android:layout_weight="1"
                     android:layout_gravity="center_vertical"
                     android:fontFamily="sans-serif-light"
-                    android:hint="Latitude"
+                    android:hint="@string/placeholder_place_lat"
                     android:inputType="none"
                     android:autofillHints=""
                     android:textSize="18sp"
@@ -121,7 +140,7 @@
                     android:layout_weight="1"
                     android:layout_gravity="center_vertical"
                     android:fontFamily="sans-serif-light"
-                    android:hint="Longitude"
+                    android:hint="@string/placeholder_place_lng"
                     android:inputType="none"
                     android:autofillHints=""
                     android:textSize="18sp"
@@ -139,7 +158,7 @@
                 android:autofillHints=""
                 android:textSize="18sp"
                 android:focusable="false"
-                android:focusableInTouchMode="false"/>/>
+                android:focusableInTouchMode="false"/>
 
             <Button
                 android:id="@+id/btnSave"

@@ -74,6 +74,7 @@
     <string name="cancel_exclusion">Cancel</string>
 
     <!-- edit place page -->
+    <string name="upload_button">Upload Image</string>
     <string name="new_place_title">New Place</string>
     <string name="edit_place_title">Edit Place</string>
     <string name="forbidden_empty">Name field is empty.</string>
@@ -83,6 +84,8 @@
     <string name="placeholder_place_description">Description</string>
     <string name="placeholder_place_phone">Phone</string>
     <string name="placeholder_place_visited">Is visited place?</string>
+    <string name="placeholder_place_lat">Latitude</string>
+    <string name="placeholder_place_lng">Longitude</string>
     <string name="edit_save_button">Save</string>
 
     <!--  PERMISSÕES  -->
