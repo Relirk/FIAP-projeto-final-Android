@@ -39,7 +39,7 @@
         <activity android:name=".main.activity.login.LoginActivity" />
 
         <service
-            android:name=".FirebaseMessagingService"
+            android:name=".main.service.FirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
