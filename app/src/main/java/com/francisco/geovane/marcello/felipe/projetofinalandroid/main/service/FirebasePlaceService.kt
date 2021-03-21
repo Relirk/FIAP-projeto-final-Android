@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -74,7 +75,7 @@ class FirebasePlaceService {
 
                     listPlaces.add(place)
 
-                    Log.d(TAG, "DocumentSnapshot data: $document")
+                    //Log.d(TAG, "DocumentSnapshot data: $document")
                 }
                 users.value = listPlaces
             }
@@ -96,7 +97,7 @@ class FirebasePlaceService {
                     "flavor" to formattedFields.flavor,
                     "lat" to formattedFields.lat,
                     "lng" to formattedFields.lng,
-                    "image" to "",
+                    "image" to formattedFields.image,
                     "userId" to formattedFields.userId
             ))
             .addOnSuccessListener {
@@ -196,11 +197,11 @@ class FirebasePlaceService {
             .addOnFailureListener { e -> Log.d(TAG, "Error deleting document $id", e) }
     }
 
-    fun uploadImage(imageURI: Uri): String {
+    fun uploadImage(imageURI: Uri): Task<Uri>? {
         val ref = imageRef?.child("${UUID.randomUUID()}")
         val upload = ref?.putFile(imageURI)
         var uriString: String = ""
-        upload?.continueWithTask { task ->
+        return upload?.continueWithTask { task ->
             if (!task.isSuccessful) {
                 task.exception?.let {
                     throw it
@@ -209,15 +210,13 @@ class FirebasePlaceService {
             ref.downloadUrl
         }
         ?.addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-            uriString = task.result.toString()
-        } else {
-            Log.d("FAILED", "Image download capture failed ")
-        }
-        //dar um return do link de download aqui
+            if (task.isSuccessful) {
+                uriString = task.result.toString()
+            } else {
+                Log.d("FAILED", "Image download capture failed ")
+            }
         }?.addOnFailureListener {
             Log.e(TAG, "Image upload failed ")
         }
-        return uriString
     }
 }

@@ -5,10 +5,11 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.text.InputType
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -17,10 +18,10 @@ import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.service.FirebasePlaceService
 import com.github.dhaval2404.imagepicker.ImagePicker
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import java.io.File
 
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -35,6 +36,7 @@ class EditPlaceActivity : AppCompatActivity() {
     private lateinit var etPlaceLng: EditText
     private lateinit var etPlaceFlavor: EditText
     private lateinit var etPlaceVisited: CheckBox
+    private lateinit var progressBar: ProgressBar
     private lateinit var auth: FirebaseAuth
 
     private var id: String? = null
@@ -46,13 +48,15 @@ class EditPlaceActivity : AppCompatActivity() {
     private var flavor: String? = null
     private val firebasePlaceService = FirebasePlaceService()
 
-    private lateinit var newImage: Uri
+    private var newUrlUriImage: Task<Uri>? = null
+    private lateinit var localPathNewImage: Uri
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit)
         supportActionBar?.hide()
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        progressBar = findViewById(R.id.list_spinner)
         etPlaceImage = findViewById(R.id.etPlaceImage)
         etPlaceName = findViewById(R.id.etPlaceName)
         etPlaceAddress = findViewById(R.id.etPlaceAddress)
@@ -69,6 +73,7 @@ class EditPlaceActivity : AppCompatActivity() {
 
         // Firebase
         auth = Firebase.auth
+        progressBar.visibility = View.GONE
 
         val action = intent.getStringExtra("action")
         if(action != null) {
@@ -92,8 +97,12 @@ class EditPlaceActivity : AppCompatActivity() {
 
         val saveButton = findViewById<Button>(R.id.btnSave)
         saveButton.setOnClickListener {
-            val replyIntent = Intent()
-            var imgUri: String
+            val imagePath = if(action == null) {
+                if (newUrlUriImage?.result != null) newUrlUriImage?.result else intent.getStringExtra("image")
+            } else {
+                newUrlUriImage?.result
+            }
+
             if (etPlaceName.text.toString().trim().isEmpty()) {
                 Toast.makeText(
                     applicationContext,
@@ -101,9 +110,6 @@ class EditPlaceActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
-                if (newImage.toString().isNotEmpty()) {
-                    Log.d("SELECTED_IMAGE", "$newImage")
-                }
 
                 val place = LocationObj(
                     id.toString(),
@@ -114,7 +120,7 @@ class EditPlaceActivity : AppCompatActivity() {
                     etPlaceVisited.isChecked,
                     etPlacePhone.text.toString(),
                     etPlaceAddress.text.toString(),
-                    setUploadData(newImage),
+                    imagePath.toString(),
                     etPlaceFlavor.text.toString(),
                     auth.currentUser?.uid
                 )
@@ -124,7 +130,6 @@ class EditPlaceActivity : AppCompatActivity() {
                     val id = intent.getStringExtra("id")
                     firebasePlaceService.saveEditedLocation(id, place)
                 }
-                setResult(RESULT_OK, replyIntent)
                 finish()
             }
         }
@@ -145,26 +150,30 @@ class EditPlaceActivity : AppCompatActivity() {
         }
     }
 
+    private fun setUploadData(Uri: Uri) {
+        newUrlUriImage = firebasePlaceService.uploadImage(Uri)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (resultCode == Activity.RESULT_OK) {
+            progressBar.visibility = View.VISIBLE
+            etPlaceImage.visibility = View.GONE
+
             val fileUri = data?.data
             if (fileUri != null) {
-                newImage = fileUri
+                localPathNewImage = fileUri
             }
-            Glide.with(applicationContext).load(fileUri).into(etPlaceImage)
+            setUploadData(localPathNewImage)
+            Handler().postDelayed(Runnable {
+                progressBar.visibility = View.GONE
+                etPlaceImage.visibility = View.VISIBLE
+                Glide.with(applicationContext).load(fileUri).into(etPlaceImage) }, 5000)
         } else if (resultCode == ImagePicker.RESULT_ERROR) {
             Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun setUploadData(Uri: Uri): String {
-        var realUri: String = ""
-        realUri = firebasePlaceService.uploadImage(Uri)
-        return realUri
     }
 
     private fun setDataFields() {

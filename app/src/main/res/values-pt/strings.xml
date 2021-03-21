@@ -76,6 +76,7 @@
     <string name="text_share">Compartilhar para:</string>
 
     <!-- edit place page -->
+    <string name="upload_button">Carregar uma Imagem</string>
     <string name="new_place_title">Novo Lugar</string>
     <string name="edit_place_title">Editar Lugar</string>
     <string name="forbidden_empty">Campo Nome está vazio.</string>
@@ -85,6 +86,8 @@
     <string name="placeholder_place_description">Descrição</string>
     <string name="placeholder_place_phone">Telefone</string>
     <string name="placeholder_place_visited">Ligar já visitado?</string>
+    <string name="placeholder_place_lat">Latitude</string>
+    <string name="placeholder_place_lng">Longitude</string>
     <string name="edit_save_button">Salvar</string>
 
     <!-- PERMISSÕES -->
