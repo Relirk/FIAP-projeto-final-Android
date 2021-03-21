@@ -1,6 +1,7 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
@@ -16,9 +17,13 @@ import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map.adapter.MapAdapter
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map.viewModel.MapViewModel
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.MapModel
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.FirebaseUtils
@@ -36,6 +41,11 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import java.io.IOException
 
@@ -46,6 +56,7 @@ import java.io.IOException
 )
 class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener {
 
+    private val db = Firebase.firestore
     private var LOG_TAG = "myLog__"
     private val REQUEST_CODE = 200
     private var globalSavedInstanceState: Bundle? = null
@@ -53,6 +64,8 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "Map"
 
+    private lateinit var auth: FirebaseAuth
+    private lateinit var adapter: MapAdapter
     private lateinit var params: Bundle
     private lateinit var initialMarker: Marker
     private lateinit var marker: Marker
@@ -66,6 +79,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     private lateinit var autocompleteFragment: AutocompleteSupportFragment
     private lateinit var currentLocation: Location
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private val mapViewModel: MapViewModel by viewModels()
     private var PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -76,7 +90,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         val root = inflater.inflate(R.layout.fragment_map, container, false)
+        adapter = MapAdapter(root.context)
+
         globalSavedInstanceState = savedInstanceState
         globalRoot = root
 
@@ -119,7 +136,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         } else {
             initMap()
         }
-
+        loadUserMarkers()
         return root
     }
 
@@ -142,11 +159,72 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                             .setPositiveButton(resources.getString(R.string.perm_denied_ok)) { dialog, _ ->
                                 dialog.dismiss()
                             }
-                                .show()
+                            .show()
                     }
                 }
             }
         }
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
+        map.uiSettings.isZoomControlsEnabled = true
+        map.uiSettings.isRotateGesturesEnabled = false
+        map.setMinZoomPreference(10F)
+        map.setMaxZoomPreference(18F)
+        map.setOnMarkerDragListener(this)
+        map.setOnMapClickListener(this)
+
+        setDefaultAdress()
+    }
+
+    override fun onMapClick(clickedPoint: LatLng) {
+        if(this::marker.isInitialized){
+            marker.remove()
+            updateMapWithCoordinates(clickedPoint)
+        } else {
+            updateMapWithCoordinates(clickedPoint)
+        }
+    }
+
+    override fun onMarkerDragStart(movedPoint: Marker) {}
+
+    override fun onMarkerDrag(movedPoint: Marker) {}
+
+    override fun onMarkerDragEnd(movedPoint: Marker) {}
+
+    private fun loadUserMarkers() {
+        auth = Firebase.auth
+        val locationRef = db.collection("Locations")
+        locationRef
+            .whereEqualTo("userId", auth.currentUser?.uid)
+            .whereEqualTo("flavor", appId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                formatPlacesForCreateMarkers(snapshot)
+            }
+            .addOnFailureListener { exception ->
+                Log.d(ContentValues.TAG, "Error getting documents: ", exception)
+            }
+    }
+
+    private fun formatPlacesForCreateMarkers(docs: QuerySnapshot) {
+        val places = docs.map { document ->
+            LocationObj(
+                document.id,
+                document.getString("name"),
+                document.getString("description"),
+                document.get("lat"),
+                document.get("lng"),
+                document.getBoolean("isVisited"),
+                document.getString("phoneNumber"),
+                document.getString("address"),
+                document.getString("image"),
+                document.getString("flavor"),
+                document.getString("userId")
+            )
+        }
+        places.size
     }
 
     private fun initMap() {
@@ -272,29 +350,4 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
 
         updateMap(selectedPlace, true)
     }
-
-    override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
-        map.uiSettings.isZoomControlsEnabled = true
-        map.uiSettings.isRotateGesturesEnabled = false
-        map.setMinZoomPreference(10F)
-        map.setMaxZoomPreference(18F)
-        map.setOnMarkerDragListener(this)
-        map.setOnMapClickListener(this)
-
-        setDefaultAdress()
-    }
-
-    override fun onMapClick(clickedPoint: LatLng) {
-        if(this::marker.isInitialized){
-            marker.remove()
-            updateMapWithCoordinates(clickedPoint)
-        } else {
-            updateMapWithCoordinates(clickedPoint)
-        }
-    }
-
-    override fun onMarkerDragStart(movedPoint: Marker) {}
-    override fun onMarkerDrag(movedPoint: Marker) {}
-    override fun onMarkerDragEnd(movedPoint: Marker) {}
 }

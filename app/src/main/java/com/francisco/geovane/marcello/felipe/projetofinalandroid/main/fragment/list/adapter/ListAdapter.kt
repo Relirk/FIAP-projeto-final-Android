@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -50,17 +51,29 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
     }
 
     override fun onBindViewHolder(holder: AdapterHolder, position: Int) {
+//        if (position == placeList.lastIndex){
+//            val params = holder.itemView.layoutParams as FrameLayout.LayoutParams
+//            params.bottomMargin = 100
+//            holder.itemView.layoutParams = params
+//        }else{
+//            val params = holder.itemView.layoutParams as RecyclerView.LayoutParams
+//            params.bottomMargin = 0
+//            holder.itemView.layoutParams = params
+//        }
+
+
         val place = placeList[position]
         holder.bindView(place, position)
     }
 
-    fun confirmExclusion(id: String, itemView: View): AlertDialog {
+    fun confirmExclusion(id: String?, itemView: View): AlertDialog {
+        val stringId: String = id.toString()
         return AlertDialog.Builder(context)
             .setTitle(R.string.title_exclusion)
             .setMessage(R.string.description_exclusion)
             .setIcon(R.drawable.ic_baseline_delete_24)
             .setPositiveButton(R.string.confirm_exclusion) { dialog, _ ->
-                firebasePlaceService.deleteLocation(id)
+                firebasePlaceService.deleteLocation(stringId)
                 (context as Activity).recreate()
                 dialog.dismiss()
             }

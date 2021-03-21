@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_title">Final Project</string>
 
     <string name="login">Enter</string>
     <string name="dont_have_account">I don\'t have an account yet</string>
