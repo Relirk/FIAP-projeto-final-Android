@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.text.InputType
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -219,7 +220,7 @@ class EditPlaceActivity : AppCompatActivity() {
         } else if (resultCode == ImagePicker.RESULT_ERROR) {
             Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show()
+            Log.d("EDIT", "Task Cancelled")
         }
     }
 
