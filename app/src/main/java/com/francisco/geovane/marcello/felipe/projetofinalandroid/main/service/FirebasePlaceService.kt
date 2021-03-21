@@ -75,8 +75,6 @@ class FirebasePlaceService {
                     )
 
                     listPlaces.add(place)
-
-                    //Log.d(TAG, "DocumentSnapshot data: $document")
                 }
                 users.value = listPlaces
             }
@@ -107,28 +105,6 @@ class FirebasePlaceService {
             .addOnFailureListener { exception ->
                 Log.d(TAG, "Error saving new document:", exception)
             }
-    }
-
-    fun saveNewPlaces(places: Array<LocationObj>) {
-        for (place in places) {
-            db.collection("Locations")
-                .add({
-                    "name" to place.name;
-                    "address" to place.address;
-                    "description" to place.description;
-                    "lat" to place.lat;
-                    "lng" to place.lng;
-                    "phoneNumber" to place.phoneNumber;
-                    "isVisited" to place.isVisited;
-                    "flavor" to place.flavor;
-                })
-                .addOnSuccessListener {
-                    Log.d("Firebase", "Document ${place.name} saved successful! ")
-                }
-                .addOnFailureListener { exception ->
-                    Log.w(TAG, "Error saving new document:", exception)
-                }
-        }
     }
 
     private fun initializeFields(fields: LocationObj): LocationObj {

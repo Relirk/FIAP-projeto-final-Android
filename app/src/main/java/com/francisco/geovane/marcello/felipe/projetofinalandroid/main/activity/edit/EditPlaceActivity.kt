@@ -46,7 +46,9 @@ class EditPlaceActivity : AppCompatActivity() {
     private var lat: String? = null
     private var lng: String? = null
     private var flavor: String? = null
+
     private val firebasePlaceService = FirebasePlaceService()
+    private val defaultImage: String = "https://firebasestorage.googleapis.com/v0/b/fiapandroid.appspot.com/o/placeholders%2Flocation.png?alt=media&token=3c7ac60c-6ed1-4bac-b6a0-15bf61278cb4"
 
     private var newUrlUriImage: Task<Uri>? = null
     private lateinit var localPathNewImage: Uri
@@ -100,7 +102,7 @@ class EditPlaceActivity : AppCompatActivity() {
             val imagePath = if(action == null) {
                 if (newUrlUriImage?.result != null) newUrlUriImage?.result else intent.getStringExtra("image")
             } else {
-                newUrlUriImage?.result
+                if (newUrlUriImage?.result != null) newUrlUriImage?.result else defaultImage
             }
 
             if (etPlaceName.text.toString().trim().isEmpty()) {

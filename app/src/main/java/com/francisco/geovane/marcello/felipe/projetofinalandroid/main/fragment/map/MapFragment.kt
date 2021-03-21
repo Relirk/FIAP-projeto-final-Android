@@ -191,9 +191,11 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
 
     override fun onResume() {
         super.onResume()
+
         if(this::map.isInitialized){
-            map.clear()
-            loadDefaults()
+            if(this::marker.isInitialized){
+                loadUserMarkers()
+            }
         }
     }
 
@@ -204,9 +206,11 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             ) == PackageManager.PERMISSION_GRANTED) {
             val task: Task<*> = fusedLocationProviderClient.lastLocation
             task.addOnSuccessListener { location ->
-                if (location != null) currentLocation = location as Location
-                recreateDefaultAddress()
-                loadUserMarkers()
+                if (location != null) {
+                    currentLocation = location as Location
+                    recreateDefaultAddress()
+                    loadUserMarkers()
+                }
             }
         }
     }
@@ -228,20 +232,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
 
     private fun formatPlacesForCreateMarkers(docs: QuerySnapshot) {
         val options = MarkerOptions()
-        val places = docs.map { document ->
-            LocationObj(
-                document.id,
-                document.getString("name"),
-                document.getString("description"),
-                document.get("lat"),
-                document.get("lng"),
-                document.getBoolean("isVisited"),
-                document.getString("phoneNumber"),
-                document.getString("address"),
-                document.getString("image"),
-                document.getString("flavor"),
-                document.getString("userId")
-            )
+        docs.map { document ->
             val location = LatLng(
                 parseFloat(document.get("lat") as String).toDouble(),
                 parseFloat(document.get("lng") as String).toDouble()
@@ -253,7 +244,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             options.icon(BitmapDescriptorFactory.fromResource(R.drawable.flag))
             map.addMarker(options)
         }
-        places.size
     }
 
     private fun initMap() {
@@ -343,13 +333,15 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             val options = MarkerOptions()
             options.position(place.latlong!!)
             options.title(place.name)
-            options.draggable(false)
+
 
             if (firstRun) {
+                options.draggable(false)
                 options.icon(BitmapDescriptorFactory.fromResource(R.drawable.smile))
                 initialMarker= map.addMarker(options)
                 initialMarker.showInfoWindow()
             } else {
+                options.draggable(true)
                 options.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
                 marker = map.addMarker(options)
                 marker.showInfoWindow()
