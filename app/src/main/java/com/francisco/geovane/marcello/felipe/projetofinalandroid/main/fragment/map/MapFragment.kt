@@ -259,7 +259,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         }
     }
 
-    private fun loadMap(): Boolean {
+    private fun loadMap() {
         mapView = globalRoot.findViewById(R.id.mapView) as MapView
         mapView.onCreate(globalSavedInstanceState)
         mapView.onResume()
@@ -301,12 +301,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
 
         } catch (e: Exception) {
             Log.e(TAG, e.toString())
-            return false
         }
 
-        mapView.getMapAsync(this)
+       return mapView.getMapAsync(this)
 
-        return true
     }
 
     private fun updateMap(place: MapModel, firstRun: Boolean) {
@@ -333,7 +331,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             val options = MarkerOptions()
             options.position(place.latlong!!)
             options.title(place.name)
-
 
             if (firstRun) {
                 options.draggable(false)

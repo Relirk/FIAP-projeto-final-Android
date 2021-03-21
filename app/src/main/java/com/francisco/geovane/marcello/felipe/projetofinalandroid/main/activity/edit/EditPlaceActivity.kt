@@ -1,8 +1,11 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -11,8 +14,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
@@ -38,7 +43,7 @@ class EditPlaceActivity : AppCompatActivity() {
     private lateinit var etPlaceVisited: CheckBox
     private lateinit var progressBar: ProgressBar
     private lateinit var auth: FirebaseAuth
-
+    private lateinit var localPathNewImage: Uri
     private var id: String? = null
     private var name: String? = null
     private var phoneNumber:String? = null
@@ -46,12 +51,16 @@ class EditPlaceActivity : AppCompatActivity() {
     private var lat: String? = null
     private var lng: String? = null
     private var flavor: String? = null
+    private var newUrlUriImage: Task<Uri>? = null
+    private var PERMISSIONS = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
 
+    private val REQUEST_CODE = 200
     private val firebasePlaceService = FirebasePlaceService()
     private val defaultImage: String = "https://firebasestorage.googleapis.com/v0/b/fiapandroid.appspot.com/o/placeholders%2Flocation.png?alt=media&token=3c7ac60c-6ed1-4bac-b6a0-15bf61278cb4"
-
-    private var newUrlUriImage: Task<Uri>? = null
-    private lateinit var localPathNewImage: Uri
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,11 +99,18 @@ class EditPlaceActivity : AppCompatActivity() {
 
         val uploadButton = findViewById<Button>(R.id.btnUpload)
         uploadButton.setOnClickListener {
-            ImagePicker.with(this)
-                .crop()
-                .compress(1024)
-                .maxResultSize(1080, 1080)
-                .start()
+            if (ContextCompat.checkSelfPermission(
+                    applicationContext,
+                    PERMISSIONS[0]
+                ) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(this.PERMISSIONS, REQUEST_CODE)
+            } else {
+                ImagePicker.with(this)
+                    .crop()
+                    .compress(1024)
+                    .maxResultSize(1080, 1080)
+                    .start()
+            }
         }
 
         val saveButton = findViewById<Button>(R.id.btnSave)
@@ -133,6 +149,35 @@ class EditPlaceActivity : AppCompatActivity() {
                     firebasePlaceService.saveEditedLocation(id, place)
                 }
                 finish()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ImagePicker.with(this)
+                        .crop()
+                        .compress(1024)
+                        .maxResultSize(1080, 1080)
+                        .start()
+                } else {
+                    AlertDialog.Builder(this.applicationContext)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(resources.getString(R.string.perm_denied_title))
+                        .setMessage(resources.getString(R.string.perm_denied_description))
+                        .setPositiveButton(resources.getString(R.string.perm_denied_ok)) { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .show()
+
+                }
             }
         }
     }
