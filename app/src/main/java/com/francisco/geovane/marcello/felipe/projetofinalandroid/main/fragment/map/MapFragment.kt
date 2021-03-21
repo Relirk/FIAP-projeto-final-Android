@@ -17,12 +17,9 @@ import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map.adapter.MapAdapter
-import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map.viewModel.MapViewModel
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.MapModel
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
@@ -48,6 +45,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import java.io.IOException
+import java.lang.Float.parseFloat
 
 
 @Suppress(
@@ -65,7 +63,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     private var pageId: String = "Map"
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var adapter: MapAdapter
     private lateinit var params: Bundle
     private lateinit var initialMarker: Marker
     private lateinit var marker: Marker
@@ -79,7 +76,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     private lateinit var autocompleteFragment: AutocompleteSupportFragment
     private lateinit var currentLocation: Location
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private val mapViewModel: MapViewModel by viewModels()
     private var PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -92,7 +88,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     ): View? {
 
         val root = inflater.inflate(R.layout.fragment_map, container, false)
-        adapter = MapAdapter(root.context)
 
         globalSavedInstanceState = savedInstanceState
         globalRoot = root
@@ -113,6 +108,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             map.clear()
             autocompleteFragment.setText("")
             setDefaultAdress()
+            loadUserMarkers()
         }
 
         btnAdd.setOnClickListener {
@@ -136,7 +132,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         } else {
             initMap()
         }
-        loadUserMarkers()
         return root
     }
 
@@ -169,13 +164,14 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         map.uiSettings.isZoomControlsEnabled = true
-        map.uiSettings.isRotateGesturesEnabled = false
+        map.uiSettings.isRotateGesturesEnabled = true
         map.setMinZoomPreference(10F)
         map.setMaxZoomPreference(18F)
         map.setOnMarkerDragListener(this)
         map.setOnMapClickListener(this)
 
         setDefaultAdress()
+        loadUserMarkers()
     }
 
     override fun onMapClick(clickedPoint: LatLng) {
@@ -193,6 +189,36 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
 
     override fun onMarkerDragEnd(movedPoint: Marker) {}
 
+    override fun onResume() {
+        super.onResume()
+        if(this::map.isInitialized){
+            map.clear()
+            loadDefaults()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if(this::map.isInitialized){
+            loadDefaults()
+        }
+    }
+
+
+    private fun loadDefaults() {
+        if (checkSelfPermission(
+                requireActivity().applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED) {
+            val task: Task<*> = fusedLocationProviderClient.lastLocation
+            task.addOnSuccessListener { location ->
+                if (location != null) currentLocation = location as Location
+                setDefaultAdress()
+                loadUserMarkers()
+            }
+        }
+    }
+
     private fun loadUserMarkers() {
         auth = Firebase.auth
         val locationRef = db.collection("Locations")
@@ -209,6 +235,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     }
 
     private fun formatPlacesForCreateMarkers(docs: QuerySnapshot) {
+        val options = MarkerOptions()
         val places = docs.map { document ->
             LocationObj(
                 document.id,
@@ -223,6 +250,16 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                 document.getString("flavor"),
                 document.getString("userId")
             )
+            val location = LatLng(
+                parseFloat(document.get("lat") as String).toDouble(),
+                parseFloat(document.get("lng") as String).toDouble()
+            )
+
+            options.position(location)
+            options.title(document.getString("name"))
+            options.draggable(false)
+            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.flag))
+            map.addMarker(options)
         }
         places.size
     }
@@ -291,13 +328,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         return true
     }
 
-    private fun updateMapWithCoordinates(latlong: LatLng) {
-        selectedPlace = MapModel()
-        selectedPlace.latlong = latlong
-
-        updateMap(selectedPlace, false)
-    }
-
     private fun updateMap(place: MapModel, firstRun: Boolean) {
         try {
             if(!place.isAutoComplete) {
@@ -342,6 +372,13 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         }
     }
 
+    private fun updateMapWithCoordinates(latlong: LatLng) {
+        selectedPlace = MapModel()
+        selectedPlace.latlong = latlong
+
+        updateMap(selectedPlace, false)
+    }
+
     private fun setDefaultAdress() {
         val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
         selectedPlace = MapModel()
@@ -351,3 +388,4 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         updateMap(selectedPlace, true)
     }
 }
+

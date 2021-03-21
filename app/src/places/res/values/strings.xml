@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name" translatable="false">MyLocations</string>
+    <string name="imagem_about" translatable="false">Imagem about</string>
 </resources>

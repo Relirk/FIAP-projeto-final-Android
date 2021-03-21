@@ -85,11 +85,8 @@
     <string name="placeholder_place_visited">Is visited place?</string>
     <string name="edit_save_button">Save</string>
 
-
     <!--  PERMISSÕES  -->
     <string name="perm_denied_title">Permission denied</string>
     <string name="perm_denied_description">To use the map features, the location permission is required, if you have selected for \'do not ask again\' check your device settings, otherwise access the Map tab again</string>
     <string name="perm_denied_ok">OK</string>
-
-
 </resources>

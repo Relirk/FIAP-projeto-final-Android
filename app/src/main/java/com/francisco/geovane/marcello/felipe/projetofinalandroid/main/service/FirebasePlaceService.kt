@@ -15,7 +15,7 @@ import kotlin.properties.Delegates
 class FirebasePlaceService {
     private val db = Firebase.firestore
     private val appId: String = BuildConfig.APP_ID
-    private val defaultImage: String = "https://firebasestorage.googleapis.com/v0/b/fiapandroid.appspot.com/o/placeholders%2Fplaceholder.png?alt=media&token=8a54c10b-46f0-4952-9447-1bcadd577f59"
+    private val defaultImage: String = "https://firebasestorage.googleapis.com/v0/b/fiapandroid.appspot.com/o/placeholders%2Flocation.png?alt=media&token=3c7ac60c-6ed1-4bac-b6a0-15bf61278cb4"
 
     private lateinit var auth: FirebaseAuth
     private lateinit var nameField: String

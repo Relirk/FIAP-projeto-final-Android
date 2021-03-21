@@ -51,17 +51,6 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
     }
 
     override fun onBindViewHolder(holder: AdapterHolder, position: Int) {
-//        if (position == placeList.lastIndex){
-//            val params = holder.itemView.layoutParams as FrameLayout.LayoutParams
-//            params.bottomMargin = 100
-//            holder.itemView.layoutParams = params
-//        }else{
-//            val params = holder.itemView.layoutParams as RecyclerView.LayoutParams
-//            params.bottomMargin = 0
-//            holder.itemView.layoutParams = params
-//        }
-
-
         val place = placeList[position]
         holder.bindView(place, position)
     }
