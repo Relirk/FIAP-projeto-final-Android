@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -28,10 +29,7 @@ import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -55,7 +53,7 @@ import java.lang.Float.parseFloat
 class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener {
 
     private val db = Firebase.firestore
-    private var LOG_TAG = "myLog__"
+    private var TAG = "Mapa"
     private val REQUEST_CODE = 200
     private var globalSavedInstanceState: Bundle? = null
     private var bundle: Bundle = Bundle()
@@ -169,9 +167,11 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         map.setMaxZoomPreference(18F)
         map.setOnMarkerDragListener(this)
         map.setOnMapClickListener(this)
-
+        setMapStyle(map)
+        
         setDefaultAdress()
         loadUserMarkers()
+        
     }
 
     override fun onMapClick(clickedPoint: LatLng) {
@@ -305,13 +305,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                 }
 
                 override fun onError(status: Status) {
-
-                    Log.i(LOG_TAG, status.toString())
+                    Log.i(TAG, status.toString())
                 }
             })
 
         } catch (e: Exception) {
-            Log.e(LOG_TAG, e.toString())
+            Log.e(TAG, e.toString())
             return false
         }
 
@@ -360,7 +359,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(place.latlong, 16f))
 
         } catch (e: IOException) {
-            Log.d(LOG_TAG, e.localizedMessage.toString())
+            Log.d(TAG, e.localizedMessage.toString())
         }
     }
 
@@ -393,5 +392,23 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         options.icon(BitmapDescriptorFactory.fromResource(R.drawable.smile))
         initialMarker= map.addMarker(options)
         initialMarker.showInfoWindow()
+    }
+
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            // Customize the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    context,
+                    R.raw.map_style
+                )
+            )
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e(TAG, "Can't find style. Error: ", e)
+        }
     }
 }
