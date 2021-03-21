@@ -371,12 +371,21 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     }
 
     private fun setDefaultAdress() {
-        val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
-        selectedPlace = MapModel()
-        selectedPlace.name = resources.getString(R.string.user_location)
-        selectedPlace.latlong = latLng
+        if (checkSelfPermission(
+                        requireActivity().applicationContext,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED) {
+            val task: Task<*> = fusedLocationProviderClient.lastLocation
+            task.addOnSuccessListener { location ->
+                if (location != null) currentLocation = location as Location
+                val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
+                selectedPlace = MapModel()
+                selectedPlace.name = resources.getString(R.string.user_location)
+                selectedPlace.latlong = latLng
 
-        updateMap(selectedPlace, true)
+                updateMap(selectedPlace, true)
+            }
+        }
     }
 
     private fun recreateDefaultAddress() {
