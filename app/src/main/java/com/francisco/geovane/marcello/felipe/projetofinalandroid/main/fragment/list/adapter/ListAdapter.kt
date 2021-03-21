@@ -1,4 +1,4 @@
-package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list
+package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list.adapter
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -10,9 +10,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
@@ -55,13 +55,14 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
         holder.bindView(place, position)
     }
 
-    fun confirmExclusion(id: String, itemView: View): AlertDialog {
+    fun confirmExclusion(id: String?, itemView: View): AlertDialog {
+        val stringId: String = id.toString()
         return AlertDialog.Builder(context)
             .setTitle(R.string.title_exclusion)
             .setMessage(R.string.description_exclusion)
             .setIcon(R.drawable.ic_baseline_delete_24)
             .setPositiveButton(R.string.confirm_exclusion) { dialog, _ ->
-                firebasePlaceService.deleteLocation(id)
+                firebasePlaceService.deleteLocation(stringId)
                 (context as Activity).recreate()
                 dialog.dismiss()
             }

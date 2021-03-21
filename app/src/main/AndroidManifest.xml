@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".main.activity.edit.EditPlaceActivity" android:theme="@style/Theme.ProjetoFinalAndroid.NoActionBar"/>
-        <activity android:name=".main.activity.login.SignUpActivity" />
+        <activity android:name=".main.activity.signUp.SignUpActivity" />
         <activity android:name=".main.activity.login.LoginActivity" />
     </application>
 

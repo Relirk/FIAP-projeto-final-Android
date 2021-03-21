@@ -1,4 +1,4 @@
-package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list
+package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

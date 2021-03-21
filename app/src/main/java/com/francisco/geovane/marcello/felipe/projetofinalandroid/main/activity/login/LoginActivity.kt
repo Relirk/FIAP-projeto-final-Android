@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.BaseActivity
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.MainActivity
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.signUp.SignUpActivity
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
