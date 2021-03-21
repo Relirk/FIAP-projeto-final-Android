@@ -197,14 +197,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        if(this::map.isInitialized){
-            loadDefaults()
-        }
-    }
-
-
     private fun loadDefaults() {
         if (checkSelfPermission(
                 requireActivity().applicationContext,
@@ -213,7 +205,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             val task: Task<*> = fusedLocationProviderClient.lastLocation
             task.addOnSuccessListener { location ->
                 if (location != null) currentLocation = location as Location
-                setDefaultAdress()
+                recreateDefaultAddress()
                 loadUserMarkers()
             }
         }
@@ -361,7 +353,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             } else {
                 options.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
                 marker = map.addMarker(options)
-                this.marker.showInfoWindow()
+                marker.showInfoWindow()
             }
 
             map.animateCamera(CameraUpdateFactory.newLatLng(place.latlong))
@@ -387,5 +379,19 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
 
         updateMap(selectedPlace, true)
     }
-}
 
+    private fun recreateDefaultAddress() {
+        val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
+        selectedPlace = MapModel()
+        selectedPlace.name = resources.getString(R.string.user_location)
+        selectedPlace.latlong = latLng
+
+        val options = MarkerOptions()
+        options.position(selectedPlace.latlong!!)
+        options.title(selectedPlace.name)
+        options.draggable(false)
+        options.icon(BitmapDescriptorFactory.fromResource(R.drawable.smile))
+        initialMarker= map.addMarker(options)
+        initialMarker.showInfoWindow()
+    }
+}
