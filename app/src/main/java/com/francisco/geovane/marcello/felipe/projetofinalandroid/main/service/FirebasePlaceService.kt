@@ -20,7 +20,8 @@ import kotlin.properties.Delegates
 
 class FirebasePlaceService {
     private val db = Firebase.firestore
-    private var appId: String = BuildConfig.APP_ID
+    private val appId: String = BuildConfig.APP_ID
+    private val defaultImage: String = "https://firebasestorage.googleapis.com/v0/b/fiapandroid.appspot.com/o/placeholders%2Flocation.png?alt=media&token=3c7ac60c-6ed1-4bac-b6a0-15bf61278cb4"
 
     private var imageRef: StorageReference? = Firebase.storage.reference.child("locations/")
 
@@ -131,27 +132,27 @@ class FirebasePlaceService {
     }
 
     private fun initializeFields(fields: LocationObj): LocationObj {
-        nameField = fields.name
-        addressField = fields.address
-        descriptionField = fields.description
-        phoneField = fields.phoneNumber
-        isVisitedField = fields.isVisited
+        nameField = fields.name as String
+        addressField = fields.address as String
+        descriptionField = fields.description as String
+        phoneField = fields.phoneNumber as String
+        isVisitedField = fields.isVisited as Boolean
         flavorField = fields.flavor as String
         latField = fields.lat as String
         lngField = fields.lng as String
-        imageField = ""
+        imageField = fields.image as String
         userIdField = fields.userId as String
 
-        val name = if (this::nameField.isInitialized) fields.name else ""
-        val address = if (this::addressField.isInitialized) fields.address else ""
-        val description = if (this::descriptionField.isInitialized) fields.description else ""
-        val phone = if (this::phoneField.isInitialized) fields.phoneNumber else ""
+        val name = if (nameField != "") fields.name else ""
+        val address = if (addressField != "") fields.address else ""
+        val description = if (descriptionField != "") fields.description else ""
+        val phone = if (phoneField != "") fields.phoneNumber else ""
         val isVisited = if (isVisitedField) fields.isVisited else false
-        val flavor = if (this::flavorField.isInitialized) fields.flavor else ""
-        val lat = if (this::latField.isInitialized) fields.lat else ""
-        val lng = if (this::lngField.isInitialized) fields.lng else ""
-        val image = if (this::imageField.isInitialized) fields.image else ""
-        val userId = if (this::userIdField.isInitialized) fields.userId else ""
+        val flavor = if (flavorField != "") fields.flavor else ""
+        val lat = if (latField != "") fields.lat else ""
+        val lng = if (lngField != "") fields.lng else ""
+        val image = if (imageField != "") fields.image else defaultImage
+        val userId = if (userIdField != "") fields.userId else ""
 
         return LocationObj(
             "",

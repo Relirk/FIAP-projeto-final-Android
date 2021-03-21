@@ -1,9 +1,10 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map
 
 import android.Manifest
-import android.content.DialogInterface
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -20,26 +21,29 @@ import androidx.fragment.app.Fragment
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.LocationObj
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.MapModel
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.FirebaseUtils
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
-import java.util.*
+import java.lang.Float.parseFloat
 
 
 @Suppress(
@@ -48,13 +52,15 @@ import java.util.*
 )
 class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener {
 
-    private var LOG_TAG = "myLog__"
+    private val db = Firebase.firestore
+    private var TAG = "Mapa"
     private val REQUEST_CODE = 200
     private var globalSavedInstanceState: Bundle? = null
     private var bundle: Bundle = Bundle()
     private var appId: String = BuildConfig.APP_ID
     private var pageId: String = "Map"
 
+    private lateinit var auth: FirebaseAuth
     private lateinit var params: Bundle
     private lateinit var initialMarker: Marker
     private lateinit var marker: Marker
@@ -78,7 +84,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         val root = inflater.inflate(R.layout.fragment_map, container, false)
+
         globalSavedInstanceState = savedInstanceState
         globalRoot = root
 
@@ -98,6 +106,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             map.clear()
             autocompleteFragment.setText("")
             setDefaultAdress()
+            loadUserMarkers()
         }
 
         btnAdd.setOnClickListener {
@@ -115,14 +124,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             startActivity(intent)
         }
 
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity)
         if (checkSelfPermission(requireActivity().applicationContext, PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(this.PERMISSIONS, REQUEST_CODE)
         } else {
             initMap()
         }
-
         return root
     }
 
@@ -140,17 +147,113 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                     context?.let {
                         AlertDialog.Builder(it)
                             .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setTitle(resources?.getString(R.string.perm_denied_title))
-                            .setMessage(resources?.getString(R.string.perm_denied_description))
-                            .setPositiveButton(resources?.getString(R.string.perm_denied_ok),
-                                DialogInterface.OnClickListener { dialog, _ ->
-                                    dialog.dismiss()
-                                })
+                            .setTitle(resources.getString(R.string.perm_denied_title))
+                            .setMessage(resources.getString(R.string.perm_denied_description))
+                            .setPositiveButton(resources.getString(R.string.perm_denied_ok)) { dialog, _ ->
+                                dialog.dismiss()
+                            }
                             .show()
                     }
                 }
             }
         }
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
+        map.uiSettings.isZoomControlsEnabled = true
+        map.uiSettings.isRotateGesturesEnabled = true
+        map.setMinZoomPreference(10F)
+        map.setMaxZoomPreference(18F)
+        map.setOnMarkerDragListener(this)
+        map.setOnMapClickListener(this)
+        setMapStyle(map)
+        
+        setDefaultAdress()
+        loadUserMarkers()
+        
+    }
+
+    override fun onMapClick(clickedPoint: LatLng) {
+        if(this::marker.isInitialized){
+            marker.remove()
+            updateMapWithCoordinates(clickedPoint)
+        } else {
+            updateMapWithCoordinates(clickedPoint)
+        }
+    }
+
+    override fun onMarkerDragStart(movedPoint: Marker) {}
+
+    override fun onMarkerDrag(movedPoint: Marker) {}
+
+    override fun onMarkerDragEnd(movedPoint: Marker) {}
+
+    override fun onResume() {
+        super.onResume()
+        if(this::map.isInitialized){
+            map.clear()
+            loadDefaults()
+        }
+    }
+
+    private fun loadDefaults() {
+        if (checkSelfPermission(
+                requireActivity().applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED) {
+            val task: Task<*> = fusedLocationProviderClient.lastLocation
+            task.addOnSuccessListener { location ->
+                if (location != null) currentLocation = location as Location
+                recreateDefaultAddress()
+                loadUserMarkers()
+            }
+        }
+    }
+
+    private fun loadUserMarkers() {
+        auth = Firebase.auth
+        val locationRef = db.collection("Locations")
+        locationRef
+            .whereEqualTo("userId", auth.currentUser?.uid)
+            .whereEqualTo("flavor", appId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                formatPlacesForCreateMarkers(snapshot)
+            }
+            .addOnFailureListener { exception ->
+                Log.d(ContentValues.TAG, "Error getting documents: ", exception)
+            }
+    }
+
+    private fun formatPlacesForCreateMarkers(docs: QuerySnapshot) {
+        val options = MarkerOptions()
+        val places = docs.map { document ->
+            LocationObj(
+                document.id,
+                document.getString("name"),
+                document.getString("description"),
+                document.get("lat"),
+                document.get("lng"),
+                document.getBoolean("isVisited"),
+                document.getString("phoneNumber"),
+                document.getString("address"),
+                document.getString("image"),
+                document.getString("flavor"),
+                document.getString("userId")
+            )
+            val location = LatLng(
+                parseFloat(document.get("lat") as String).toDouble(),
+                parseFloat(document.get("lng") as String).toDouble()
+            )
+
+            options.position(location)
+            options.title(document.getString("name"))
+            options.draggable(false)
+            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.flag))
+            map.addMarker(options)
+        }
+        places.size
     }
 
     private fun initMap() {
@@ -173,7 +276,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
 
         try {
             MapsInitializer.initialize(requireActivity().applicationContext)
-            Places.initialize(requireActivity().applicationContext, mapsApiKey);
+            Places.initialize(requireActivity().applicationContext, mapsApiKey)
 
             autocompleteFragment = childFragmentManager.findFragmentById(R.id.map_autocomplete) as AutocompleteSupportFragment
             autocompleteFragment.setPlaceFields(
@@ -202,34 +305,18 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                 }
 
                 override fun onError(status: Status) {
-
-                    Log.i(LOG_TAG, status.toString())
+                    Log.i(TAG, status.toString())
                 }
             })
 
         } catch (e: Exception) {
-            Log.e(LOG_TAG, e.toString())
+            Log.e(TAG, e.toString())
             return false
         }
 
         mapView.getMapAsync(this)
 
         return true
-    }
-
-    private fun updateMapWithCoordinates(latlong: LatLng) {
-        /*val geocoder = Geocoder(this.context)
-        val addressList: List<Address> = geocoder.getFromLocation(
-            marker.position.latitude,
-            marker.position.longitude,
-            1
-        )*/
-        val geocoder = Geocoder(this.context)
-        selectedPlace = MapModel()
-        selectedPlace.latlong = latlong
-//        selectedPlace.id = place.id
-
-        updateMap(selectedPlace, false)
     }
 
     private fun updateMap(place: MapModel, firstRun: Boolean) {
@@ -265,48 +352,63 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             } else {
                 options.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
                 marker = map.addMarker(options)
-                this.marker.showInfoWindow()
+                marker.showInfoWindow()
             }
 
             map.animateCamera(CameraUpdateFactory.newLatLng(place.latlong))
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(place.latlong, 16f))
 
         } catch (e: IOException) {
-            Log.d(LOG_TAG, e.localizedMessage.toString())
+            Log.d(TAG, e.localizedMessage.toString())
         }
+    }
+
+    private fun updateMapWithCoordinates(latlong: LatLng) {
+        selectedPlace = MapModel()
+        selectedPlace.latlong = latlong
+
+        updateMap(selectedPlace, false)
     }
 
     private fun setDefaultAdress() {
         val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
         selectedPlace = MapModel()
-        selectedPlace.name = resources?.getString(R.string.user_location)
+        selectedPlace.name = resources.getString(R.string.user_location)
         selectedPlace.latlong = latLng
 
         updateMap(selectedPlace, true)
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
-        map.uiSettings.isZoomControlsEnabled = true
-        map.uiSettings.isRotateGesturesEnabled = false
-        map.setMinZoomPreference(10F)
-        map.setMaxZoomPreference(18F)
-        map.setOnMarkerDragListener(this)
-        map.setOnMapClickListener(this)
+    private fun recreateDefaultAddress() {
+        val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
+        selectedPlace = MapModel()
+        selectedPlace.name = resources.getString(R.string.user_location)
+        selectedPlace.latlong = latLng
 
-        setDefaultAdress()
+        val options = MarkerOptions()
+        options.position(selectedPlace.latlong!!)
+        options.title(selectedPlace.name)
+        options.draggable(false)
+        options.icon(BitmapDescriptorFactory.fromResource(R.drawable.smile))
+        initialMarker= map.addMarker(options)
+        initialMarker.showInfoWindow()
     }
 
-    override fun onMapClick(clickedPoint: LatLng) {
-        if(this::marker.isInitialized){
-            marker.remove()
-            updateMapWithCoordinates(clickedPoint)
-        } else {
-            updateMapWithCoordinates(clickedPoint)
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            // Customize the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    context,
+                    R.raw.map_style
+                )
+            )
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e(TAG, "Can't find style. Error: ", e)
         }
     }
-
-    override fun onMarkerDragStart(movedPoint: Marker) { }
-    override fun onMarkerDrag(movedPoint: Marker) { }
-    override fun onMarkerDragEnd(movedPoint: Marker) {  }
 }

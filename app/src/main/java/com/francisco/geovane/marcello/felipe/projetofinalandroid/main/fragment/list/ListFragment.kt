@@ -19,14 +19,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list.adapter.ListAdapter
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list.viewModel.ListViewModel
 
 class ListFragment : Fragment() {
-
-//    private var pageId: String = "List"
-//    private var bundle: Bundle = Bundle()
-//    private var appId: String = BuildConfig.APP_ID
-//
-//    private val firebasePlaceService = FirebasePlaceService()
 
     private lateinit var adapter: ListAdapter
     private lateinit var listViewModel: ListViewModel
@@ -49,7 +45,6 @@ class ListFragment : Fragment() {
         adapter = ListAdapter(root.context)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(root.context)
-
 
         return root
     }
@@ -86,12 +81,12 @@ class ListFragment : Fragment() {
         bringItens()
     }
 
-     fun bringItens() {
-        listViewModel.fetchPlaces().observe(viewLifecycleOwner, Observer {
+     private fun bringItens() {
+        listViewModel.fetchPlaces().observe(viewLifecycleOwner, {
             adapter.setList(it)
             adapter.notifyDataSetChanged()
             progressBar.visibility = View.GONE
         })
-         Handler().postDelayed(Runnable { swipeLayout.isRefreshing = false }, 3000)
+         Handler().postDelayed({ swipeLayout.isRefreshing = false }, 3000)
     }
 }

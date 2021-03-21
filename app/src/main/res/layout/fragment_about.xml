@@ -34,7 +34,7 @@
             android:layout_height="150dp"
             android:layout_gravity="center"
             android:src="@drawable/logo"
-            />
+            android:contentDescription="@string/imagem_about" />
 
         <TextView
             android:id="@+id/text_app_version"

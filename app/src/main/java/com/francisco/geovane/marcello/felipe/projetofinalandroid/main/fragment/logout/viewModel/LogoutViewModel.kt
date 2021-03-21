@@ -1,4 +1,4 @@
-package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.logout
+package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.logout.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

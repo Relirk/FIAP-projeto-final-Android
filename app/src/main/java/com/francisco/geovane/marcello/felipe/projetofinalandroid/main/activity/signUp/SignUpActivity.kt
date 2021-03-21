@@ -1,10 +1,9 @@
-package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.login
+package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.signUp
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.util.Patterns
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -12,6 +11,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.BaseActivity
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.login.LoginActivity
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth

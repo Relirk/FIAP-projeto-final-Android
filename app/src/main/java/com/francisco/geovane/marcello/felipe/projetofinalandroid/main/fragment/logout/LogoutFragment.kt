@@ -12,6 +12,7 @@ import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.login.LoginActivity
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.MainActivity
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.logout.viewModel.LogoutViewModel
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.francisco.geovane.marcello.felipe.projetofinalandroidlib.components.customdialog.CustomDialog
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -73,10 +74,6 @@ class LogoutFragment : Fragment() {
 
         logoutViewModel = ViewModelProvider(this).get(LogoutViewModel::class.java)
 
-//        val textView: TextView = root.findViewById(R.id.text_notifications)
-//        logoutViewModel.text.observe(viewLifecycleOwner, Observer {
-//            textView.text = it
-//        })
         return inflater.inflate(R.layout.fragment_logout, container, false)
     }
 }
