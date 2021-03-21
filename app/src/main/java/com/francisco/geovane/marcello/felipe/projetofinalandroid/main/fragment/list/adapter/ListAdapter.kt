@@ -1,4 +1,4 @@
-package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list
+package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list.adapter
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity

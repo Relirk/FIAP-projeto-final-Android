@@ -1,7 +1,6 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map
 
 import android.Manifest
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
@@ -20,6 +19,7 @@ import androidx.fragment.app.Fragment
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.BuildConfig
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.activity.edit.EditPlaceActivity
+import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model.MapModel
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.AnalyticsUtils
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.main.utils.FirebaseUtils
 import com.google.android.gms.common.api.Status
@@ -37,9 +37,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
-import java.util.*
 
 
 @Suppress(
@@ -115,8 +113,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
             startActivity(intent)
         }
 
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity)
         if (checkSelfPermission(requireActivity().applicationContext, PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(this.PERMISSIONS, REQUEST_CODE)
         } else {
@@ -140,13 +137,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
                     context?.let {
                         AlertDialog.Builder(it)
                             .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setTitle(resources?.getString(R.string.perm_denied_title))
-                            .setMessage(resources?.getString(R.string.perm_denied_description))
-                            .setPositiveButton(resources?.getString(R.string.perm_denied_ok),
-                                DialogInterface.OnClickListener { dialog, _ ->
-                                    dialog.dismiss()
-                                })
-                            .show()
+                            .setTitle(resources.getString(R.string.perm_denied_title))
+                            .setMessage(resources.getString(R.string.perm_denied_description))
+                            .setPositiveButton(resources.getString(R.string.perm_denied_ok)) { dialog, _ ->
+                                dialog.dismiss()
+                            }
+                                .show()
                     }
                 }
             }
@@ -173,7 +169,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
 
         try {
             MapsInitializer.initialize(requireActivity().applicationContext)
-            Places.initialize(requireActivity().applicationContext, mapsApiKey);
+            Places.initialize(requireActivity().applicationContext, mapsApiKey)
 
             autocompleteFragment = childFragmentManager.findFragmentById(R.id.map_autocomplete) as AutocompleteSupportFragment
             autocompleteFragment.setPlaceFields(
@@ -218,10 +214,8 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     }
 
     private fun updateMapWithCoordinates(latlong: LatLng) {
-        val geocoder = Geocoder(this.context)
         selectedPlace = MapModel()
         selectedPlace.latlong = latlong
-//        selectedPlace.id = place.id
 
         updateMap(selectedPlace, false)
     }
@@ -273,7 +267,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
     private fun setDefaultAdress() {
         val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
         selectedPlace = MapModel()
-        selectedPlace.name = resources?.getString(R.string.user_location)
+        selectedPlace.name = resources.getString(R.string.user_location)
         selectedPlace.latlong = latLng
 
         updateMap(selectedPlace, true)
@@ -300,7 +294,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMapClickListener
         }
     }
 
-    override fun onMarkerDragStart(movedPoint: Marker) { }
-    override fun onMarkerDrag(movedPoint: Marker) { }
-    override fun onMarkerDragEnd(movedPoint: Marker) {  }
+    override fun onMarkerDragStart(movedPoint: Marker) {}
+    override fun onMarkerDrag(movedPoint: Marker) {}
+    override fun onMarkerDragEnd(movedPoint: Marker) {}
 }

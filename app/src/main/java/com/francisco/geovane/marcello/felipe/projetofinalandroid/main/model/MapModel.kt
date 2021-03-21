@@ -1,4 +1,4 @@
-package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.map
+package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.model
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
