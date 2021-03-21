@@ -1,17 +1,20 @@
 package com.francisco.geovane.marcello.felipe.projetofinalandroid.main.fragment.list.adapter
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
+import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.francisco.geovane.marcello.felipe.projetofinalandroid.R
@@ -32,6 +35,11 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
     private lateinit var btnDelete: FloatingActionButton
 
     private val firebasePlaceService = FirebasePlaceService()
+
+    private val REQUEST_CODE = 200
+    private var PERMISSIONS = arrayOf(
+            Manifest.permission.CALL_PHONE
+    )
 
     fun setList(list: MutableList<LocationObj>) {
         placeList = list
@@ -105,10 +113,19 @@ class ListAdapter(private val context: Context): RecyclerView.Adapter<ListAdapte
             }
 
             btnCall.setOnClickListener {
-                val intent = Intent(Intent.ACTION_DIAL)
-                intent.data = Uri.parse("tel:${place.phoneNumber}")
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(intent)
+                if (ContextCompat.checkSelfPermission(context.applicationContext, PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions((context as Activity), PERMISSIONS, REQUEST_CODE)
+                } else {
+                    if (ContextCompat.checkSelfPermission(
+                                    context.applicationContext,
+                                    PERMISSIONS[0]
+                            ) == PackageManager.PERMISSION_GRANTED) {
+                        val intent = Intent(Intent.ACTION_CALL)
+                        intent.data = Uri.parse("tel:${place.phoneNumber}")
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                    }
+                }
             }
 
             btnShare.setOnClickListener {
